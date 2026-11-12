@@ -1,0 +1,10 @@
+node_modules/
+.env
+*.log
+
+# yt-dlp yang didownload otomatis
+bin/
+
+# Cookies YouTube — isinya sesi login akun Google, JANGAN di-commit
+cookies.txt
+*cookies*.txt
