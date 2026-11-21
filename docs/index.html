@@ -8,261 +8,356 @@
 <meta property="og:title" content="music-dc">
 <meta property="og:description" content="Bot musik Discord self-hosted. Satu proses Node, yt-dlp, dan FFmpeg.">
 <meta property="og:type" content="website">
-<meta name="theme-color" content="#0f0f0e">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6a2b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18V5l11-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='17' cy='16' r='3'/></svg>">
+<meta name="theme-color" content="#1b1b1b">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23161616' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18V5l11-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='17' cy='16' r='3'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&family=IBM+Plex+Mono:wght@400;500&family=Nanum+Pen+Script&display=swap" rel="stylesheet">
 <style>
 :root {
-  color-scheme: dark;
-  --bg: #0f0f0e;
-  --surface: #161614;
-  --surface-2: #1d1d1a;
-  --line: #2a2a26;
-  --line-2: #3a3a35;
-  --text: #e9e7e1;
-  --muted: #9b988f;
-  --faint: #6d6a62;
-  --accent: #ff6a2b;
-  --accent-dim: rgba(255, 106, 43, 0.12);
-  --ok: #7bc58b;
-  --err: #ef7a6b;
-  --link: #6ea8fe;
-  --embed: #5865f2;
-  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
-  --gutter: clamp(16px, 4vw, 40px);
+  color-scheme: light;
+  --desk: #1b1b1b;
+  --paper: #efefec;
+  --paper-2: #e6e6e2;
+  --ink: #161616;
+  --ink-2: #3a3a38;
+  --ink-3: #75746f;
+  --blue: #a9d4f2;
+  --blue-2: #8cc2ea;
+  --blue-3: #5aa6dc;
+  --blue-ink: #1f3b57;
+  --red: #c8443e;
+  --slip: #f7f7f4;
+  --sans: 'Archivo', 'Arial Narrow', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, Consolas, monospace;
+  --hand: 'Nanum Pen Script', 'Comic Sans MS', cursive;
+  --gutter: clamp(14px, 3.4vw, 44px);
+  --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
-  margin: 0; background: var(--bg); color: var(--text);
-  font: 16px/1.6 var(--sans); overflow-x: hidden; -webkit-font-smoothing: antialiased;
+  margin: 0; background: var(--desk); color: var(--ink);
+  font: 15px/1.55 var(--sans); font-stretch: 100%;
+  overflow-x: hidden; -webkit-font-smoothing: antialiased;
+  background-image: radial-gradient(ellipse at 50% 0%, #2a2a2a, var(--desk) 70%);
 }
 a { color: inherit; }
-code, pre { font-family: var(--mono); font-size: .92em; }
-::selection { background: var(--accent); color: #111; }
-.wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
-.icon { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+code, pre { font-family: var(--mono); font-size: .9em; }
+::selection { background: var(--blue); }
+:focus-visible { outline: 2px solid var(--blue-3); outline-offset: 2px; }
+.icon { width: 16px; height: 16px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .icon.fill { fill: currentColor; stroke: none; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.caps { text-transform: uppercase; letter-spacing: .02em; }
+.hand { font-family: var(--hand); font-size: 1.55em; line-height: 1.1; color: #1d1d2a; }
+
+/* ---------- binder + sleeve + paper ---------- */
+.binder { position: relative; max-width: 1040px; margin: clamp(0px, 3vw, 36px) auto; padding-left: 54px; }
+.rings { position: absolute; left: 0; top: 0; bottom: 0; width: 54px; background: #f3f3f1; border-radius: 4px 0 0 4px; overflow: hidden; }
+.rings::before {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(circle at 30px 50%, #1b1b1b 0 7px, transparent 7.5px) 0 0 / 54px 76px repeat-y;
+}
+.rings::after {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 24px;
+  background: repeating-linear-gradient(to bottom, transparent 0 30px, #b9b9b6 30px 34px, #e9e9e7 34px 38px, #9d9d9a 38px 42px, transparent 42px 76px);
+  border-radius: 0 6px 6px 0; opacity: .9;
+}
+.sheet {
+  position: relative; background: var(--paper) var(--noise); padding: 22px var(--gutter) 30px;
+  overflow: hidden; overflow: clip;
+  box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
+}
+.sleeve {
+  --sx: 30%; --sy: 10%;
+  pointer-events: none; position: absolute; inset: 0; z-index: 30;
+  background:
+    radial-gradient(ellipse 40% 30% at var(--sx) var(--sy), rgba(255, 255, 255, 0.55), transparent 70%),
+    linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.18) 48%, transparent 56%);
+  mix-blend-mode: soft-light; transition: background-position .2s;
+}
+.binder::after { /* tepi plastik */
+  content: ''; pointer-events: none; position: absolute; inset: -2px 0 -2px 40px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 3px;
+}
 
 /* ---------- header ---------- */
-.top { position: sticky; top: 0; z-index: 20; background: rgba(15, 15, 14, 0.92); border-bottom: 1px solid var(--line); }
-.top .wrap { display: flex; align-items: center; gap: 28px; height: 56px; }
-.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; text-decoration: none; }
-.brand .icon { color: var(--accent); width: 20px; height: 20px; }
-.top nav { display: flex; gap: 22px; margin-left: auto; font-size: 14px; }
-.top nav a { color: var(--muted); text-decoration: none; }
-.top nav a:hover { color: var(--text); }
-.gh { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: var(--muted); text-decoration: none; }
-.gh:hover { color: var(--text); }
+.mast { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 12px; }
+.mast-left { font: 600 11px/1.25 var(--sans); font-stretch: 90%; text-transform: uppercase; }
+.mast-center { text-align: center; }
+.mast-right { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 10px; }
+.wordmark { display: block; width: min(330px, 46vw); height: auto; margin: 0 auto -6px; }
+.title-row { display: flex; align-items: center; gap: 14px; }
+.title-row::before, .title-row::after { content: ''; flex: 1; border-top: 3px double var(--ink); }
+.tracklist-word { font-weight: 800; font-stretch: 112%; font-size: clamp(30px, 5.4vw, 48px); letter-spacing: .02em; line-height: 1; }
+.no { font: 600 11px var(--sans); }
+.ornament { width: 92px; height: 22px; color: var(--ink); }
+.rule { border: 0; border-top: 1px solid var(--ink); margin: 14px 0; }
+.rule.double { border-top: 3px double var(--ink); }
 
-.btn {
-  display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 6px;
-  border: 1px solid var(--line-2); background: transparent; color: var(--text);
-  font: 500 15px/1 var(--sans); text-decoration: none; cursor: pointer;
+.meta { display: grid; grid-template-columns: minmax(0, 1fr) 210px; gap: 24px; align-items: start; margin-top: 18px; }
+.legal { font: 600 10.5px/1.45 var(--sans); font-stretch: 88%; text-transform: uppercase; max-width: 470px; margin: 0 0 18px; }
+.fields { display: grid; grid-template-columns: 22px auto minmax(0, 1fr); align-items: end; gap: 4px 12px; max-width: 520px; }
+.fields .star { grid-row: span 2; align-self: center; width: 18px; height: 18px; border: 1.5px solid var(--ink); display: grid; place-items: center; }
+.fields .star .icon { width: 11px; height: 11px; }
+.fields dt { font: 600 11px var(--sans); text-transform: uppercase; }
+.fields dd { margin: 0; border-bottom: 1px solid var(--ink); padding: 0 8px 1px; font-size: 16px; font-weight: 500; text-transform: uppercase; }
+.index { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 16px; font: 600 11px var(--sans); text-transform: uppercase; }
+.index b { font-weight: 800; }
+.index a { text-decoration: none; border-bottom: 1px solid transparent; }
+.index a:hover { border-bottom-color: var(--ink); }
+.stampbox { border: 1.5px solid var(--ink); height: 118px; position: relative; cursor: pointer; background: transparent; padding: 0; width: 100%; font: inherit; color: inherit; }
+.stampbox .lbl { display: block; border-bottom: 1.5px solid var(--ink); font: 700 11px/22px var(--sans); text-transform: uppercase; text-align: center; }
+.stamp {
+  position: absolute; color: var(--red); font-weight: 900; font-stretch: 125%; text-transform: uppercase; line-height: 1;
+  border: 3px solid currentColor; border-radius: 6px; padding: 6px 10px; filter: url(#ink); opacity: .88; mix-blend-mode: multiply;
+  pointer-events: none; white-space: nowrap;
 }
-.btn:hover { border-color: var(--muted); }
-.btn-primary { background: var(--accent); border-color: var(--accent); color: #140a05; }
-.btn-primary:hover { background: #ff7d45; border-color: #ff7d45; }
+.stampbox .stamp { left: 50%; top: 59%; font-size: 19px; font-stretch: 110%; padding: 5px 8px; transform: translate(-50%, -50%) rotate(var(--r, -8deg)); }
+.stamp small { display: block; font: 700 9px var(--mono); letter-spacing: .08em; text-align: center; margin-top: 3px; }
+.thunk { animation: thunk .45s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes thunk { from { opacity: 0; transform: translate(-50%, -50%) rotate(var(--r, -8deg)) scale(1.9); } to { opacity: .88; transform: translate(-50%, -50%) rotate(var(--r, -8deg)) scale(1); } }
 
-/* ---------- hero ---------- */
-.hero { padding: clamp(56px, 9vw, 110px) 0 clamp(56px, 8vw, 96px); border-bottom: 1px solid var(--line); }
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
-.hero h1 { font-size: clamp(34px, 5vw, 54px); line-height: 1.08; letter-spacing: -0.025em; font-weight: 600; margin: 0 0 18px; }
-.hero h1 span { color: var(--accent); }
-.hero p { color: var(--muted); font-size: 18px; margin: 0 0 28px; max-width: 46ch; }
-.hero .actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.specs { margin: 34px 0 0; padding: 0; list-style: none; font: 13px/1.9 var(--mono); color: var(--faint); }
-.specs li { display: flex; gap: 10px; }
-.specs b { color: var(--muted); font-weight: 500; min-width: 9.5ch; }
-
-.scope { border: 1px solid var(--line-2); border-radius: 8px; background: #0b0b0a; overflow: hidden; }
-.scope-head, .scope-foot { display: flex; justify-content: space-between; gap: 12px; padding: 9px 14px; font: 12px var(--mono); color: var(--faint); }
-.scope-head { border-bottom: 1px solid var(--line); }
-.scope-foot { border-top: 1px solid var(--line); }
-.scope-head .live { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); }
-.scope-head .led { width: 7px; height: 7px; border-radius: 50%; background: var(--line-2); }
-.scope-head .live.on .led { background: var(--accent); }
-.scope-foot span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#scope { display: block; width: 100%; aspect-ratio: 16 / 10; cursor: crosshair; touch-action: pan-y; }
-
-/* ---------- sections ---------- */
-section { padding: clamp(64px, 9vw, 104px) 0; border-bottom: 1px solid var(--line); }
-.sec-head { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 0 16px; margin-bottom: 36px; }
-.sec-head .no { font: 500 13px/2.2 var(--mono); color: var(--accent); }
-.sec-head h2 { margin: 0; font-size: clamp(26px, 3.4vw, 34px); line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; }
-.sec-head p { grid-column: 2; margin: 10px 0 0; color: var(--muted); max-width: 62ch; }
-.fade { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
-.fade.in { opacity: 1; transform: none; }
-
-/* ---------- demo ---------- */
-.demo { display: grid; grid-template-columns: 240px minmax(0, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.cmds { border-right: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; }
-.cmds .label { padding: 14px 16px 10px; font: 12px var(--mono); color: var(--faint); text-transform: uppercase; letter-spacing: .08em; }
-.cmd {
-  display: flex; align-items: center; gap: 12px; padding: 11px 16px; border: 0; border-top: 1px solid var(--line);
-  background: transparent; color: var(--text); text-align: left; cursor: pointer; font: 14px var(--sans);
-}
-.cmd:hover:not(:disabled) { background: var(--surface-2); }
-.cmd:hover:not(:disabled) .icon { color: var(--accent); }
-.cmd:disabled { cursor: wait; color: var(--faint); }
-.cmd .icon { color: var(--muted); }
-.cmd code { font-size: 13.5px; }
-.cmd small { display: block; color: var(--faint); font-size: 12.5px; }
-.cmds .hint { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--faint); }
-
-.chat { display: flex; flex-direction: column; height: 540px; background: #121211; min-width: 0; }
-.chat-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
-.chat-head .icon { color: var(--faint); width: 16px; height: 16px; }
-.chat-head b { font-weight: 600; }
-.chat-head .voice { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; color: var(--faint); font-size: 13px; white-space: nowrap; }
-.chat-head .voice.on { color: var(--muted); }
-.chat-head .voice.on .icon { color: var(--accent); }
-.log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
-.msg { display: flex; gap: 12px; animation: in .25s ease; }
-@keyframes in { from { opacity: 0; transform: translateY(4px); } }
-.av { width: 34px; height: 34px; border-radius: 50%; flex: none; display: grid; place-items: center; }
-.av .icon { width: 17px; height: 17px; }
-.av.user { background: #2b2b27; color: var(--muted); }
-.av.bot { background: var(--accent); color: #140a05; }
-.body { min-width: 0; flex: 1; }
-.meta { display: flex; align-items: center; gap: 7px; font-size: 13.5px; margin-bottom: 2px; }
-.meta b { font-weight: 600; }
-.meta .tag { font: 600 10px/1 var(--sans); padding: 3px 4px; border-radius: 3px; background: var(--embed); color: #fff; }
-.meta time { color: var(--faint); font-size: 12px; }
-.slash { font-family: var(--mono); font-size: 13.5px; }
-.slash .n { color: var(--accent); }
-.slash .a { color: var(--muted); }
-.embed { border-left: 3px solid var(--embed); background: var(--surface); border-radius: 4px; padding: 9px 12px; font-size: 14.5px; max-width: 500px; overflow-wrap: anywhere; }
-.embed.thumb { display: grid; grid-template-columns: minmax(0, 1fr) 60px; gap: 12px; }
-.embed .art { width: 60px; height: 60px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line); display: grid; place-items: center; color: var(--faint); }
-.embed .art .icon { width: 24px; height: 24px; }
-.embed a { color: var(--link); text-decoration: none; }
-.embed .dur { font: 12.5px var(--mono); background: rgba(255, 255, 255, 0.06); padding: 1px 5px; border-radius: 3px; }
-.embed .bar { font-size: 12.5px; letter-spacing: -1px; white-space: nowrap; overflow: hidden; display: inline-block; max-width: 100%; }
-.embed .foot { font-size: 12px; color: var(--faint); margin-top: 5px; }
-.embed .mention { color: #c9cdfb; background: rgba(88, 101, 242, 0.25); border-radius: 3px; padding: 0 3px; }
-.eph { font-size: 14px; color: var(--muted); }
-.eph small { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--faint); margin-top: 2px; }
-.eph small .icon { width: 13px; height: 13px; }
-.typing { height: 0; overflow: hidden; padding-left: 62px; font-size: 12.5px; color: var(--faint); transition: height .15s; }
-.typing.on { height: 18px; }
-.input { margin: 0 16px 16px; padding: 11px 13px; border-radius: 6px; background: var(--surface-2); color: var(--faint); font: 13.5px var(--mono); min-height: 42px; display: flex; align-items: center; }
-.input.active { color: var(--text); }
-.caret { display: inline-block; width: 7px; height: 15px; background: var(--accent); margin-left: 1px; animation: blink 1s steps(1) infinite; }
+/* ---------- hero (foto + kartu biru) ---------- */
+.plus { text-align: center; font: 600 10px var(--sans); text-transform: uppercase; margin: 18px 0 6px; }
+.photos { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.photo { position: relative; height: 400px; background: #0d0d0d; overflow: hidden; border: 1px solid #000; }
+.photo::after { content: ''; position: absolute; inset: 0; background: var(--noise); opacity: .9; mix-blend-mode: screen; pointer-events: none; }
+.photo canvas { display: block; width: 100%; height: 100%; }
+.photo .cap { position: absolute; left: 10px; bottom: 8px; font: 500 10.5px var(--mono); color: #9a9a96; text-transform: uppercase; letter-spacing: .06em; z-index: 1; }
+.photo .term { position: absolute; inset: 0; padding: 18px 18px 30px; font: 12.5px/1.75 var(--mono); color: #d9d9d4; white-space: pre-wrap; overflow-wrap: anywhere; filter: grayscale(1) contrast(1.05); }
+.term .p { color: #fff; font-weight: 500; }
+.term .d { color: #7d7d78; }
+.caret { display: inline-block; width: 7px; height: 14px; background: currentColor; vertical-align: -2px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
-/* ---------- pipeline ---------- */
-.stages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
-.stage {
-  position: relative; display: flex; flex-direction: column; gap: 4px; padding: 18px 16px 16px; text-align: left;
-  border: 0; border-right: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; font: inherit;
+.card {
+  --rx: 0deg; --ry: 0deg;
+  position: relative; background: var(--blue) var(--noise); color: var(--ink);
+  border: 1.5px solid var(--blue-ink); box-shadow: 0 18px 36px -14px rgba(0, 0, 0, 0.55), 0 2px 0 rgba(0, 0, 0, 0.1);
 }
-.stage:last-child { border-right: 0; }
-.stage::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: transparent; }
-.stage.active { background: var(--surface-2); }
-.stage.active::before { background: var(--accent); }
-.stage .icon { width: 22px; height: 22px; color: var(--muted); margin-bottom: 10px; }
-.stage.active .icon { color: var(--accent); }
-.stage .k { font: 12px var(--mono); color: var(--faint); }
-.stage b { font-weight: 600; font-size: 15px; }
-.stage span:not(.k) { font-size: 13px; color: var(--muted); line-height: 1.35; }
-.stage .arrow { position: absolute; right: -7px; top: 26px; z-index: 1; width: 13px; height: 13px; color: var(--line-2); background: var(--bg); }
-.detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; margin-top: 20px; padding: 24px 0 0; min-height: 150px; }
-.detail h3 { margin: 0 0 8px; font-size: 19px; font-weight: 600; }
-.detail p { margin: 0; color: var(--muted); }
-.detail pre { margin: 0; padding: 14px 16px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
-.swap { animation: in .3s ease; }
+.card-frame { margin: 7px; border: 1.5px solid var(--ink); }
+.hero-card {
+  position: absolute; left: 50%; top: 46px; width: min(640px, 88%); z-index: 5;
+  transform: translateX(-50%) perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(-1.4deg);
+  transition: transform .25s ease-out;
+}
+.card-head { display: flex; align-items: center; gap: 16px; padding: 10px 14px 6px; }
+.card-head .num { font-weight: 800; font-stretch: 100%; font-size: 40px; line-height: 1; }
+.card-head .ttl { flex: 1; text-align: center; font-weight: 900; font-stretch: 110%; font-size: clamp(28px, 4.2vw, 44px); line-height: 1; letter-spacing: .01em; }
+.card-head .icon { width: 30px; height: 30px; stroke-width: 1.4; }
+.strip { display: flex; justify-content: space-between; gap: 20px; background: var(--ink); color: var(--blue); font: 700 9.5px/18px var(--sans); text-transform: uppercase; padding: 0 12px; white-space: nowrap; overflow: hidden; }
+.card-fields { display: grid; grid-template-columns: 112px minmax(0, 1fr); border-top: 1.5px solid var(--ink); }
+.card-fields dt { font: 700 11px/1.35 var(--sans); text-transform: uppercase; padding: 8px 12px; border-right: 1.5px solid var(--ink); }
+.card-fields dd { margin: 0; padding: 8px 12px; font: 13px/1.35 var(--mono); }
+.card-fields dt + dd, .card-fields dd + dt { border-top: 0; }
+.comment { border-top: 1.5px solid var(--ink); padding: 6px 12px 10px; position: relative; min-height: 76px; }
+.comment .lbl { font: 700 11px var(--sans); text-transform: uppercase; }
+.comment .hand { display: block; margin-top: 4px; font-size: clamp(24px, 3.4vw, 32px); padding-right: 96px; }
+.write { clip-path: inset(0 100% 0 0); }
+.in .write, .write.in { clip-path: inset(0 0 0 0); transition: clip-path 1.8s steps(28, end) .3s; }
+.emblem { position: absolute; right: 10px; bottom: 6px; width: 84px; height: 84px; transform: rotate(-8deg); }
+.clip { position: absolute; right: -16px; top: 46%; width: 66px; height: 26px; z-index: 2; color: #9b9b98; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.35)); }
 
-.note { margin-top: 48px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; padding-top: 32px; border-top: 1px dashed var(--line-2); }
-.note h3 { margin: 0 0 8px; font-size: 19px; font-weight: 600; }
-.note p { margin: 0; color: var(--muted); }
-.trace { margin: 0; padding: 0; list-style: none; font: 13px/1.5 var(--mono); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
-.trace li { display: flex; gap: 12px; padding: 9px 14px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
-.trace li:first-child { border-top: 0; color: var(--err); }
-.trace li:last-child { color: var(--ok); background: rgba(123, 197, 139, 0.06); }
-.trace li span { color: var(--faint); flex: none; }
+.ntable { width: 100%; border-collapse: collapse; margin-top: 26px; font-size: 14px; }
+.ntable th { font: 700 11px var(--sans); text-transform: uppercase; text-align: left; padding: 5px 10px; border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.ntable td { padding: 8px 10px; border-bottom: 1.5px solid var(--ink); text-transform: uppercase; font-weight: 500; }
+.ntable th + th, .ntable td + td { border-left: 1px solid var(--ink); }
+.ctas { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+.tagbtn {
+  display: inline-flex; align-items: center; gap: 8px; padding: 9px 14px; border: 1.5px solid var(--ink);
+  font: 800 12px/1 var(--sans); font-stretch: 110%; text-transform: uppercase; letter-spacing: .04em; text-decoration: none; background: transparent; color: var(--ink); cursor: pointer;
+}
+.tagbtn.solid { background: var(--ink); color: var(--paper); }
+.tagbtn:hover { background: var(--blue); color: var(--ink); }
 
-/* ---------- features ---------- */
-.feats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); }
-.feat { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 2px 14px; padding: 22px 24px 22px 0; border-bottom: 1px solid var(--line); }
-.feat:nth-child(odd) { border-right: 1px solid var(--line); }
-.feat:nth-child(even) { padding-left: 24px; }
-.feat .icon { grid-row: span 2; width: 22px; height: 22px; color: var(--accent); margin-top: 2px; }
-.feat h3 { margin: 0; font-size: 16px; font-weight: 600; }
-.feat p { margin: 0; color: var(--muted); font-size: 15px; }
-.stack { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 28px; font: 13px var(--mono); color: var(--faint); }
-.stack b { color: var(--muted); font-weight: 500; }
+.ribbon { margin: 26px calc(var(--gutter) * -1); background: var(--blue-2); border-top: 1px solid var(--blue-3); border-bottom: 1px solid var(--blue-3); overflow: hidden; }
+.ribbon-track { display: flex; width: max-content; animation: slide 40s linear infinite; }
+.ribbon span { font: 700 10px/20px var(--sans); text-transform: uppercase; color: var(--blue-ink); padding: 0 48px; white-space: nowrap; }
+@keyframes slide { to { transform: translateX(-50%); } }
 
-/* ---------- install ---------- */
-.install { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
-.steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; counter-reset: s; min-width: 0; }
-.step { min-width: 0; }
-.step h3 { display: flex; gap: 12px; align-items: baseline; margin: 0 0 6px; font-size: 16px; font-weight: 600; }
-.step h3::before { counter-increment: s; content: counter(s, decimal-leading-zero); font: 500 13px var(--mono); color: var(--accent); }
-.step p { margin: 0 0 10px; color: var(--muted); font-size: 15px; }
+/* ---------- sections ---------- */
+.sec { padding-top: 28px; }
+.sec-title { display: flex; align-items: baseline; gap: 14px; border-bottom: 3px double var(--ink); padding-bottom: 6px; margin: 0 0 18px; }
+.sec-title .n { font-weight: 800; font-size: 34px; line-height: 1; }
+.sec-title h2 { margin: 0; font-weight: 900; font-stretch: 112%; font-size: clamp(22px, 3.2vw, 30px); text-transform: uppercase; letter-spacing: .01em; line-height: 1; }
+.sec-title .sub { margin-left: auto; font: 600 11px var(--sans); text-transform: uppercase; color: var(--ink-2); text-align: right; }
+
+/* demo */
+.demo-card { transform: rotate(.6deg); }
+.demo-body { display: grid; grid-template-columns: 200px minmax(0, 1fr); border-top: 1.5px solid var(--ink); }
+.cmds { border-right: 1.5px solid var(--ink); display: flex; flex-direction: column; }
+.cmds .lbl { font: 700 11px var(--sans); text-transform: uppercase; padding: 8px 12px; border-bottom: 1px solid var(--ink); }
+.cmd { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border: 0; border-bottom: 1px solid rgba(22, 22, 22, 0.35); background: transparent; color: var(--ink); cursor: pointer; text-align: left; font: 13px var(--mono); }
+.cmd .box { width: 14px; height: 14px; border: 1.5px solid var(--ink); display: grid; place-items: center; flex: none; }
+.cmd .box .icon { width: 10px; height: 10px; opacity: 0; stroke-width: 3; }
+.cmd:hover:not(:disabled) { background: rgba(255, 255, 255, 0.35); }
+.cmd.done .box .icon { opacity: 1; }
+.cmd:disabled { cursor: wait; color: var(--ink-2); }
+.cmds .hint { margin-top: auto; padding: 10px 12px; font-size: 22px; }
+.chat { display: flex; flex-direction: column; height: 460px; min-width: 0; }
+.chat-head { display: flex; justify-content: space-between; gap: 10px; padding: 8px 12px; border-bottom: 1px solid var(--ink); font: 700 11px var(--sans); text-transform: uppercase; }
+.chat-head .on { color: var(--red); }
+.log { flex: 1; overflow-y: auto; padding: 12px; display: flex; flex-direction: column; gap: 10px; }
+.log::-webkit-scrollbar { width: 6px; } .log::-webkit-scrollbar-thumb { background: var(--blue-3); }
+.msg { display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 10px; animation: rise .25s ease; }
+@keyframes rise { from { opacity: 0; transform: translateY(4px); } }
+.who { font: 700 10.5px/1.6 var(--sans); text-transform: uppercase; padding-top: 2px; }
+.who small { display: block; font: 10px var(--mono); color: var(--ink-2); text-transform: none; }
+.slash { font: 13.5px var(--mono); }
+.slash .a { color: var(--ink-2); }
+.slip { background: var(--slip); border: 1px solid rgba(22, 22, 22, 0.5); border-left: 4px solid var(--ink); padding: 7px 10px; font-size: 14px; overflow-wrap: anywhere; box-shadow: 1px 2px 0 rgba(0, 0, 0, 0.12); }
+.slip.thumb { display: grid; grid-template-columns: minmax(0, 1fr) 54px; gap: 10px; }
+.slip .art { width: 54px; height: 54px; background: #0d0d0d; color: #cfcfca; display: grid; place-items: center; }
+.slip .art .icon { width: 22px; height: 22px; }
+.slip a { color: var(--blue-ink); text-decoration: underline; text-underline-offset: 2px; }
+.slip .dur { font: 12px var(--mono); border: 1px solid rgba(22, 22, 22, 0.4); padding: 0 4px; }
+.slip .bar { font-size: 12px; letter-spacing: -1px; white-space: nowrap; display: inline-block; max-width: 100%; overflow: hidden; }
+.slip .foot { font-size: 11.5px; color: var(--ink-3); margin-top: 4px; }
+.slip .mention { background: var(--blue); padding: 0 3px; }
+.eph { font-size: 13.5px; }
+.eph small { display: flex; align-items: center; gap: 5px; font: 10.5px var(--mono); color: var(--ink-2); }
+.eph small .icon { width: 12px; height: 12px; }
+.typing { height: 0; overflow: hidden; padding: 0 12px 0 100px; font: 11px var(--mono); color: var(--ink-2); transition: height .15s; }
+.typing.on { height: 18px; }
+.input { margin: 0 12px 12px; padding: 9px 11px; border: 1.5px solid var(--ink); background: var(--slip); font: 13px var(--mono); color: var(--ink-3); min-height: 38px; display: flex; align-items: center; }
+.input.active { color: var(--ink); }
+
+/* tracklist */
+.tracks { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 28px; align-items: start; }
+.track-list { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+.track { display: grid; grid-template-columns: 44px minmax(0, auto) 1fr auto; align-items: baseline; gap: 10px; width: 100%; padding: 12px 6px; border: 0; border-bottom: 1px solid var(--ink); background: transparent; color: var(--ink); cursor: pointer; text-align: left; font: inherit; }
+.track:hover { background: rgba(169, 212, 242, 0.35); }
+.track.active { background: var(--blue); }
+.track .tn { font-weight: 800; font-size: 22px; line-height: 1; }
+.track .tt { font-weight: 900; font-stretch: 108%; font-size: 18px; text-transform: uppercase; line-height: 1.1; }
+.track .lead { border-bottom: 1.5px dotted var(--ink-2); transform: translateY(-4px); min-width: 20px; }
+.track .ts { font: 11.5px var(--mono); text-transform: uppercase; white-space: nowrap; }
+.detail-card { transform: rotate(-.8deg); }
+.detail-card .card-head .ttl { font-size: clamp(24px, 3vw, 34px); text-align: left; min-width: 0; overflow-wrap: anywhere; }
+.detail-card pre { margin: 0; padding: 10px 12px; background: var(--slip); border: 1px solid rgba(22, 22, 22, 0.5); white-space: pre-wrap; overflow-wrap: anywhere; font-size: 12.5px; }
+.detail-card .comment { min-height: 66px; }
+.detail-card .comment .hand { padding-right: 0; }
+.swap { animation: rise .3s ease; }
+
+.memo { margin-top: 30px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 26px; align-items: start; padding: 16px; border: 1.5px dashed var(--ink-2); position: relative; }
+.memo .lbl { font: 700 11px var(--sans); text-transform: uppercase; color: var(--red); }
+.memo h3 { margin: 4px 0 8px; font-weight: 900; font-stretch: 105%; font-size: 20px; text-transform: uppercase; line-height: 1.15; }
+.memo p { margin: 0; font-size: 15px; color: var(--ink-2); }
+.trace { list-style: none; margin: 0; padding: 0; border: 1.5px solid var(--ink); font: 12.5px/1.5 var(--mono); background: var(--slip); }
+.trace li { display: flex; gap: 10px; padding: 7px 10px; border-top: 1px solid rgba(22, 22, 22, 0.35); overflow-wrap: anywhere; }
+.trace li:first-child { border-top: 0; color: var(--red); }
+.trace li:last-child { background: var(--blue); font-weight: 500; }
+.trace li span { color: var(--ink-3); flex: none; }
+.memo .hand { position: absolute; right: 18px; bottom: -14px; font-size: 26px; color: var(--red); transform: rotate(-3deg); background: var(--paper); padding: 0 6px; }
+
+/* spec */
+.spec-wrap { position: relative; }
+.spec { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.spec th { font: 700 11px var(--sans); text-transform: uppercase; text-align: left; padding: 6px 10px; border-top: 1.5px solid var(--ink); border-bottom: 1px solid var(--ink); }
+.spec td { padding: 10px; border-bottom: 1px solid var(--ink); vertical-align: top; }
+.spec th + th, .spec td + td { border-left: 1px solid var(--ink); }
+.spec td:first-child { font-weight: 800; font-stretch: 105%; text-transform: uppercase; white-space: nowrap; }
+.spec td:first-child .icon { vertical-align: -3px; margin-right: 8px; }
+.spec td:nth-child(2) { font: 12.5px var(--mono); white-space: nowrap; }
+.spec-wrap .stamp { right: 6%; top: 46%; font-size: clamp(26px, 5vw, 44px); transform: translate(0, -50%) rotate(-12deg); opacity: 0; }
+.spec-wrap.in .stamp { animation: thunk2 .5s cubic-bezier(.2, 1.4, .4, 1) .5s both; }
+@keyframes thunk2 { from { opacity: 0; transform: translate(0, -50%) rotate(-12deg) scale(2); } to { opacity: .85; transform: translate(0, -50%) rotate(-12deg) scale(1); } }
+.stack { margin-top: 14px; font: 11.5px var(--mono); text-transform: uppercase; color: var(--ink-2); }
+
+/* release */
+.release { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; display: grid; gap: 16px; min-width: 0; }
+.steps li { min-width: 0; border-top: 1.5px solid var(--ink); padding-top: 8px; }
+.steps h3 { margin: 0 0 6px; display: flex; gap: 10px; align-items: baseline; font-weight: 800; font-stretch: 105%; font-size: 15px; text-transform: uppercase; }
+.steps h3::before { counter-increment: s; content: counter(s, decimal-leading-zero); font-size: 20px; font-weight: 800; }
+.steps p { margin: 0 0 8px; font-size: 14px; color: var(--ink-2); }
 .code { position: relative; }
-.code pre { margin: 0; padding: 13px 48px 13px 14px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; overflow-x: auto; }
-.copy {
-  position: absolute; top: 7px; right: 7px; width: 32px; height: 32px; display: grid; place-items: center;
-  border-radius: 5px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--muted); cursor: pointer;
-}
-.copy:hover { color: var(--text); }
-.copy.ok { color: var(--ok); }
-.copy .icon { width: 15px; height: 15px; }
-.term { position: sticky; top: 80px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #0b0b0a; }
-.term-head { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; border-bottom: 1px solid var(--line); font: 12px var(--mono); color: var(--faint); }
-.term-head button { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; color: var(--faint); font: 12px var(--mono); cursor: pointer; padding: 2px 0; }
-.term-head button:hover { color: var(--text); }
-.term-head button .icon { width: 13px; height: 13px; }
-.term-body { padding: 16px; font: 13px/1.75 var(--mono); min-height: 260px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }
-.term-body .p { color: var(--accent); }
-.term-body .d { color: var(--faint); }
+.code pre { margin: 0; padding: 10px 44px 10px 12px; background: var(--slip); border: 1px solid var(--ink); font-size: 12.5px; overflow-x: auto; }
+.copy { position: absolute; top: 6px; right: 6px; width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid var(--ink); background: var(--paper); color: var(--ink); cursor: pointer; }
+.copy:hover { background: var(--blue); }
+.copy.ok { background: var(--blue); }
+.copy .icon { width: 14px; height: 14px; }
+.reqs { border: 1.5px solid var(--ink); padding: 14px 16px; }
+.reqs .lbl { font: 700 11px var(--sans); text-transform: uppercase; }
+.req-row { display: grid; grid-template-columns: auto 18px minmax(0, 1fr); align-items: center; gap: 12px; margin-top: 10px; }
+.req-row b { font-weight: 800; font-size: 13px; text-transform: uppercase; }
+.brace { width: 18px; height: 54px; color: var(--ink); }
+.req-row dl { margin: 0; display: grid; grid-template-columns: 70px minmax(0, 1fr); gap: 6px 10px; }
+.req-row dt { font: 700 11px var(--sans); text-transform: uppercase; align-self: end; }
+.req-row dd { margin: 0; border-bottom: 1px solid var(--ink); font: 500 14px var(--sans); text-transform: uppercase; }
+.reqs .hand { display: block; margin-top: 14px; font-size: 24px; }
 
-footer { padding: 40px 0 56px; color: var(--faint); font-size: 14px; }
-footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; }
-footer p { margin: 0; max-width: 64ch; }
+/* footer */
+.foot { margin-top: 36px; border-top: 3px double var(--ink); padding-top: 14px; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 18px; align-items: center; }
+.barcode { display: flex; align-items: center; gap: 10px; background: var(--ink); color: var(--paper); padding: 6px 10px; }
+.bars { display: flex; height: 26px; align-items: stretch; }
+.bars i { display: block; background: var(--paper); }
+.foot .fine { font: 600 10px/1.45 var(--sans); font-stretch: 88%; text-transform: uppercase; }
+.foot .code-no { font: 600 10px var(--sans); margin-top: 6px; }
+.foot .gh { display: inline-flex; align-items: center; gap: 7px; font: 700 12px var(--sans); text-transform: uppercase; text-decoration: none; border: 1.5px solid var(--ink); padding: 8px 12px; }
+.foot .gh:hover { background: var(--blue); }
+
+.fade { opacity: 0; transform: translateY(14px); transition: opacity .7s ease, transform .7s ease; }
+.fade.in { opacity: 1; transform: none; }
+.demo-card.fade { transform: translateY(14px) rotate(.6deg); }
+.demo-card.fade.in { transform: rotate(.6deg); }
+.detail-card.fade { transform: translateY(14px) rotate(-.8deg); }
+.detail-card.fade.in { transform: rotate(-.8deg); }
 
 /* ---------- responsive ---------- */
-@media (max-width: 960px) {
-  .hero .wrap, .install, .detail, .note { grid-template-columns: minmax(0, 1fr); }
-  .stages { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .stage:nth-child(3n) { border-right: 0; }
-  .stage:nth-child(n+4) { border-top: 1px solid var(--line); }
-  .stage:nth-child(3n) .arrow { display: none; }
-  .term { position: relative; top: 0; }
+@media (max-width: 900px) {
+  .tracks, .release, .memo { grid-template-columns: minmax(0, 1fr); }
+  .photo { height: 300px; }
+  .hero-card { position: relative; left: auto; top: auto; width: auto; margin: -150px 10px 0; transform: perspective(900px) rotateX(var(--rx)) rotateY(var(--ry)) rotate(-1.2deg); }
 }
-@media (max-width: 760px) {
-  .top nav { display: none; }
-  .gh { margin-left: auto; }
-  .sec-head { grid-template-columns: minmax(0, 1fr); }
-  .sec-head p { grid-column: 1; }
-  .demo { grid-template-columns: minmax(0, 1fr); }
-  .cmds { border-right: 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .cmds .label, .cmds .hint { grid-column: 1 / -1; }
+@media (max-width: 680px) {
+  .binder { padding-left: 26px; margin: 0; }
+  .rings { width: 26px; }
+  .rings::before { background: radial-gradient(circle at 14px 50%, #1b1b1b 0 5px, transparent 5.5px) 0 0 / 26px 60px repeat-y; }
+  .rings::after { width: 10px; background: repeating-linear-gradient(to bottom, transparent 0 24px, #b9b9b6 24px 27px, #e9e9e7 27px 30px, #9d9d9a 30px 33px, transparent 33px 60px); }
+  .binder::after { left: 18px; }
+  .mast { grid-template-columns: 1fr auto; }
+  .mast-center { grid-column: 1 / -1; grid-row: 2; }
+  .meta { grid-template-columns: minmax(0, 1fr); }
+  .stampbox { height: 100px; }
+  .photos { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .photo { height: 210px; }
+  .photo .term { font-size: 9.5px; padding: 10px 10px 26px; line-height: 1.6; }
+  .hero-card { margin: -80px 0 0; }
+  .card-head .num { font-size: 28px; }
+  .card-head { gap: 10px; padding: 8px 10px 5px; }
+  .hero-card .card-head .icon { display: none; }
+  .hero-card .card-head .ttl { font-size: 30px; }
+  .stampbox .stamp { font-size: 17px; }
+  .card-fields { grid-template-columns: 88px minmax(0, 1fr); }
+  .card-fields dt { padding: 7px 8px; font-size: 10px; }
+  .card-fields dd { padding: 7px 8px; font-size: 12px; }
+  .comment .hand { padding-right: 70px; }
+  .emblem { width: 64px; height: 64px; }
+  .clip { right: -10px; width: 50px; }
+  .ntable th, .ntable td { padding: 6px; font-size: 12px; }
+  .demo-body { grid-template-columns: minmax(0, 1fr); }
+  .cmds { border-right: 0; border-bottom: 1.5px solid var(--ink); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cmds .lbl { grid-column: 1 / -1; }
   .cmds .hint { display: none; }
-  .cmd { flex-direction: column; gap: 6px; text-align: center; padding: 12px 6px; border-right: 1px solid var(--line); }
-  .cmd:nth-of-type(3n) { border-right: 0; }
-  .cmd small { display: none; }
-  .chat { height: 500px; }
-  .stages { grid-template-columns: minmax(0, 1fr); }
-  .stage { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 12px; border-right: 0; border-top: 1px solid var(--line); padding: 14px 16px; }
-  .stage:first-child { border-top: 0; }
-  .stage .icon { margin: 0; }
-  .stage .k { order: 3; margin-left: auto; }
-  .stage span:not(.k) { flex-basis: 100%; padding-left: 34px; }
-  .stage .arrow { display: none; }
-  .stage::before { right: auto; bottom: 0; width: 2px; height: auto; }
-  .feats { grid-template-columns: minmax(0, 1fr); }
-  .feat, .feat:nth-child(even) { padding: 20px 0; border-right: 0; }
+  .cmd { padding: 9px 6px; gap: 6px; font-size: 11px; min-width: 0; overflow-wrap: anywhere; border-right: 1px solid rgba(22, 22, 22, 0.35); }
+  .detail-card .card-head .ttl { font-size: 22px; }
+  .msg { grid-template-columns: minmax(0, 1fr); gap: 3px; }
+  .who small { display: inline; margin-left: 6px; }
+  .typing { padding-left: 12px; }
+  .chat { height: 440px; }
+  .track { grid-template-columns: 34px minmax(0, 1fr) auto; }
+  .track .lead { display: none; }
+  .spec td:nth-child(2) { white-space: normal; }
+  .spec th:nth-child(2), .spec td:nth-child(2) { display: none; }
+  .sec-title .sub { display: none; }
+  .foot { grid-template-columns: minmax(0, 1fr); }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .fade { opacity: 1; transform: none; }
+  .write { clip-path: none; }
 }
 </style>
 </head>
@@ -270,122 +365,176 @@ footer p { margin: 0; max-width: 64ch; }
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
+    <filter id="ink" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="3" seed="4" result="n"/>
+      <feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -2.4 1.75" result="m"/>
+      <feComposite in="SourceGraphic" in2="m" operator="in" result="c"/>
+      <feTurbulence type="fractalNoise" baseFrequency=".04" numOctaves="2" seed="9" result="w"/>
+      <feDisplacementMap in="c" in2="w" scale="3"/>
+    </filter>
+    <filter id="rough" x="-5%" y="-20%" width="110%" height="140%">
+      <feTurbulence type="turbulence" baseFrequency=".018 .08" numOctaves="2" seed="7" result="t"/>
+      <feDisplacementMap in="SourceGraphic" in2="t" scale="7"/>
+    </filter>
     <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
-    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
-    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
-    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 12h3.5l2.5-7 4 14 3-10 2 3h5"/></symbol>
-    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></symbol>
-    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 4.5v15l10-7.5z"/><path d="M19 5v14"/></symbol>
-    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="1.5"/></symbol>
-    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
-    <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.5" r="1"/><path d="M9 14h.01M15 14h.01"/></symbol>
-    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></symbol>
-    <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2.5v5M15 2.5v5"/><path d="M6 7.5h12v3a6 6 0 0 1-12 0z"/><path d="M12 16.5v5"/></symbol>
-    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7.5 4v16M16.5 4v16M3 9h4.5M3 15h4.5M16.5 9H21M16.5 15H21"/></symbol>
-    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.2 5.8a9 9 0 0 1 0 12.4"/></symbol>
-    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2.5L4.5 14H11l-1 7.5L18.5 10H12z"/></symbol>
-    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.5l2.9 6.2 6.6.7-5 4.5 1.4 6.6L12 17.2l-5.9 3.3 1.4-6.6-5-4.5 6.6-.7z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="12" height="12" rx="1"/><path d="M15.5 8.5V5a1 1 0 0 0-1-1H5a1 1 0 0 0-1 1v9.5a1 1 0 0 0 1 1h3.5"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5h.01"/></symbol>
     <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2.5L4.5 14H11l-1 7.5L18.5 10H12z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="1"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.4L4 8.5"/><path d="M4 3.5v5h5"/><path d="M4 13a8 8 0 0 0 14.6 4.4L20 15.5"/><path d="M20 20.5v-5h-5"/></symbol>
     <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15.5" r="4.5"/><path d="M11.2 12.3L20 3.5"/><path d="M16.5 7l3 3"/></symbol>
     <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l5-5-5-5"/><path d="M15 12H4"/></symbol>
-    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
-    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5h.01"/></symbol>
-    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="12" height="12" rx="2"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></symbol>
-    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
-    <symbol id="i-hash" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M10.5 4L8.5 20M15.5 4l-2 16"/></symbol>
-    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
-    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
-    <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V8H8"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1"/><rect x="3" y="13" width="18" height="7" rx="1"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
     <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
   </defs>
 </svg>
 
-<header class="top">
-  <div class="wrap">
-    <a class="brand" href="#"><svg class="icon"><use href="#i-music"/></svg>music-dc</a>
-    <nav aria-label="Navigasi">
-      <a href="#demo">Demo</a>
-      <a href="#cara-kerja">Cara kerja</a>
-      <a href="#fitur">Fitur</a>
-      <a href="#instalasi">Instalasi</a>
-    </nav>
-    <a class="gh" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener"><svg class="icon fill"><use href="#i-github"/></svg>GitHub</a>
-  </div>
-</header>
+<div class="binder" id="binder">
+  <div class="rings" aria-hidden="true"></div>
+  <div class="sheet">
+    <div class="sleeve" id="sleeve" aria-hidden="true"></div>
 
-<main>
-  <div class="hero">
-    <div class="wrap">
-      <div>
-        <h1>Bot musik Discord yang jalan di <span>satu proses Node</span>.</h1>
-        <p>music-dc muter lagu dari YouTube dan ratusan situs lain pakai yt-dlp dan FFmpeg. Nggak pakai Lavalink, Java, atau Docker. Cocok buat server tongkrongan yang di-host sendiri.</p>
-        <div class="actions">
-          <a class="btn btn-primary" href="#instalasi">Pasang sendiri</a>
-          <a class="btn" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener"><svg class="icon fill"><use href="#i-github"/></svg>Source code</a>
+    <!-- ===== MASTHEAD ===== -->
+    <header>
+      <div class="mast">
+        <div class="mast-left">music-dc<br>discord music bot<br>self-hosted</div>
+        <div class="mast-center">
+          <svg class="wordmark" viewBox="0 0 400 90" role="img" aria-label="music-dc">
+            <g filter="url(#rough)">
+              <text x="200" y="66" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-style="italic" font-size="70" font-stretch="125%" letter-spacing="-2" fill="none" stroke="#161616" stroke-width="5" stroke-linejoin="round">music-dc</text>
+              <text x="200" y="66" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-style="italic" font-size="70" font-stretch="125%" letter-spacing="-2" fill="#efefec" stroke="#efefec" stroke-width="1.5">music-dc</text>
+              <text x="203" y="64" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-style="italic" font-size="70" font-stretch="125%" letter-spacing="-2" fill="none" stroke="#161616" stroke-width="1.2" opacity=".55">music-dc</text>
+            </g>
+          </svg>
+          <div class="title-row"><span class="tracklist-word">TRACKLIST</span></div>
         </div>
-        <ul class="specs">
-          <li><b>runtime</b>Node.js ≥ 22.12</li>
-          <li><b>library</b>discord.js 14 · DisTube 5 · @discordjs/voice 0.19</li>
-          <li><b>audio</b>yt-dlp → FFmpeg → Opus (DAVE)</li>
-        </ul>
-      </div>
-      <figure class="scope" style="margin:0">
-        <div class="scope-head">
-          <span class="live" id="scopeLive"><span class="led"></span><span id="scopeState">IDLE</span></span>
-          <span>OUT · 48 kHz · s16le</span>
-        </div>
-        <canvas id="scope" aria-label="Osiloskop dekoratif yang bereaksi ke kursor dan ke demo di bawah"></canvas>
-        <figcaption class="scope-foot"><span id="scopeRead">gerakin kursor di layar</span><span id="scopeTrack">—</span></figcaption>
-      </figure>
-    </div>
-  </div>
-
-  <section id="demo">
-    <div class="wrap">
-      <div class="sec-head fade">
-        <span class="no">01</span>
-        <h2>Demo</h2>
-        <p>Simulasi di browser. Format balasan, progress bar, dan aturan antriannya ngikutin kode bot yang asli. Judul lagunya fiktif.</p>
-      </div>
-      <div class="demo fade">
-        <div class="cmds">
-          <div class="label">Slash command</div>
-          <button class="cmd" data-cmd="play"><svg class="icon"><use href="#i-play"/></svg><span><code>/play</code><small>tambah lagu</small></span></button>
-          <button class="cmd" data-cmd="queue"><svg class="icon"><use href="#i-list"/></svg><span><code>/queue</code><small>lihat antrian</small></span></button>
-          <button class="cmd" data-cmd="nowplaying"><svg class="icon"><use href="#i-wave"/></svg><span><code>/nowplaying</code><small>progress lagu</small></span></button>
-          <button class="cmd" data-cmd="loop"><svg class="icon"><use href="#i-repeat"/></svg><span><code>/loop</code><small>off → lagu → queue</small></span></button>
-          <button class="cmd" data-cmd="skip"><svg class="icon"><use href="#i-skip"/></svg><span><code>/skip</code><small>lagu berikutnya</small></span></button>
-          <button class="cmd" data-cmd="stop"><svg class="icon"><use href="#i-stop"/></svg><span><code>/stop</code><small>stop dan keluar</small></span></button>
-          <div class="hint">Coba <code>/play</code> dua-tiga kali, lalu <code>/queue</code>.</div>
-        </div>
-        <div class="chat" aria-live="polite">
-          <div class="chat-head">
-            <svg class="icon"><use href="#i-hash"/></svg><b>musik</b>
-            <span class="voice" id="voice"><svg class="icon"><use href="#i-volume"/></svg><span id="voiceText">belum di voice</span></span>
-          </div>
-          <div class="log" id="log"></div>
-          <div class="typing" id="typing">music-dc sedang mengetik…</div>
-          <div class="input" id="input">Kirim pesan ke #musik</div>
+        <div class="mast-right">
+          <svg class="ornament" viewBox="0 0 92 22" aria-hidden="true">
+            <path d="M2 14c10-8 18 6 28-2M90 14c-10-8-18 6-28-2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/>
+            <use href="#i-star" x="34" y="0" width="24" height="22" style="fill:currentColor;stroke:none"/>
+            <circle cx="24" cy="6" r="1.6" fill="currentColor"/><circle cx="68" cy="6" r="1.6" fill="currentColor"/>
+          </svg>
+          <span class="no">NO. 0001</span>
         </div>
       </div>
-    </div>
-  </section>
 
-  <section id="cara-kerja">
-    <div class="wrap">
-      <div class="sec-head fade">
-        <span class="no">02</span>
-        <h2>Cara kerja</h2>
-        <p>Jalan yang dilewati satu lagu dari <code>/play</code> sampai voice channel. Klik tiap tahap buat lihat detailnya.</p>
-      </div>
-      <div class="stages fade" id="stages" role="tablist" aria-label="Tahapan audio"></div>
-      <div class="detail" id="detail" aria-live="polite"></div>
-
-      <div class="note fade">
+      <div class="meta">
         <div>
+          <p class="legal">(P)&amp;(C) 2026 adrawsf. Distributed via github.com/adrawsf/music-dc. Warning: streaming dari YouTube melanggar ToS YouTube. Untuk server pribadi &amp; tongkrongan saja. Printed in Indonesia.</p>
+          <dl class="fields">
+            <span class="star"><svg class="icon fill"><use href="#i-star"/></svg></span>
+            <dt>Artist</dt><dd>adrawsf</dd>
+            <dt>Album info</dt><dd>Discord music bot · v1.0</dd>
+          </dl>
+          <nav class="index" aria-label="Navigasi"><b>Index</b>
+            <a href="#demo">01 Demo</a><a href="#tracklist">02 Tracklist</a><a href="#spec">03 Spec</a><a href="#release">04 Release</a>
+          </nav>
+        </div>
+        <button class="stampbox" id="stampbox" type="button" aria-label="Cap ulang stempel">
+          <span class="lbl">Stamp</span>
+          <span class="stamp thunk" id="stamp">No Lavalink<small>1 proses node</small></span>
+        </button>
+      </div>
+      <hr class="rule double">
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero" aria-label="Ringkasan">
+      <div class="plus">Plus everything yt-dlp supports!</div>
+      <div class="photos">
+        <figure class="photo" style="margin:0"><canvas id="scope" aria-label="Osiloskop yang bereaksi ke kursor dan demo"></canvas><figcaption class="cap" id="scopeCap">fig. 01 · out 48 kHz · idle</figcaption></figure>
+        <figure class="photo" style="margin:0"><div class="term" id="term" aria-label="Contoh output terminal"></div><figcaption class="cap">fig. 02 · npm start</figcaption></figure>
+
+        <article class="card hero-card" id="heroCard">
+          <svg class="clip" viewBox="0 0 66 26" aria-hidden="true"><path d="M4 13h50a8 8 0 0 0 0-16H14a6 6 0 0 0 0 12h38" transform="translate(0 7)" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+          <div class="card-frame">
+            <div class="card-head">
+              <svg class="icon" aria-hidden="true"><use href="#i-music"/></svg>
+              <span class="num">00</span>
+              <span class="ttl">MUSIC-DC</span>
+              <svg class="icon" aria-hidden="true"><use href="#i-music"/></svg>
+            </div>
+            <div class="strip"><span>music-dc discord music bot</span><span>self-hosted · tanpa lavalink</span></div>
+            <dl class="card-fields">
+              <dt>Runtime by</dt><dd>Node.js ≥ 22.12 (satu proses)</dd>
+              <dt>Library by</dt><dd>discord.js 14, DisTube 5, @discordjs/voice 0.19</dd>
+              <dt>Audio by</dt><dd>yt-dlp → FFmpeg → Opus (DAVE)</dd>
+            </dl>
+            <div class="comment">
+              <span class="lbl">Comment</span>
+              <span class="hand write" id="heroHand">ketik /play, lagunya langsung jalan~ :)</span>
+              <svg class="emblem" viewBox="0 0 100 100" aria-hidden="true">
+                <defs><path id="ring" d="M50 50 m-37 0 a37 37 0 1 1 74 0 a37 37 0 1 1 -74 0"/></defs>
+                <circle cx="50" cy="50" r="47" fill="none" stroke="#161616" stroke-width="1.5"/>
+                <circle cx="50" cy="50" r="28" fill="none" stroke="#161616" stroke-width="1"/>
+                <text font-family="Archivo, sans-serif" font-weight="800" font-size="9.5" letter-spacing="1.6" fill="#161616"><textPath href="#ring">MUSIC-DC · DISCORD MUSIC BOT · SELF-HOSTED ·</textPath></text>
+                <use href="#i-star" x="38" y="30" width="24" height="24" style="fill:#161616;stroke:none"/>
+                <text x="50" y="66" text-anchor="middle" font-family="Archivo, sans-serif" font-weight="900" font-size="9" fill="#161616">V1.0</text>
+              </svg>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <table class="ntable">
+        <thead><tr><th>Name</th><th>Release</th><th>Ability</th></tr></thead>
+        <tbody><tr><td>music-dc</td><td>2026.11.12</td><td>Music streaming</td></tr></tbody>
+      </table>
+      <div class="ctas">
+        <a class="tagbtn solid" href="#release">Pasang sendiri <svg class="icon"><use href="#i-arrow"/></svg></a>
+        <a class="tagbtn" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener"><svg class="icon fill"><use href="#i-github"/></svg>Source code</a>
+      </div>
+    </section>
+
+    <div class="ribbon" aria-hidden="true"><div class="ribbon-track" id="ribbon"></div></div>
+
+    <!-- ===== 01 DEMO ===== -->
+    <section class="sec" id="demo">
+      <div class="sec-title"><span class="n">01</span><h2>Demo</h2><span class="sub">simulasi · lagu fiktif</span></div>
+      <article class="card demo-card fade">
+        <svg class="clip" viewBox="0 0 66 26" aria-hidden="true" style="top:18px"><path d="M4 13h50a8 8 0 0 0 0-16H14a6 6 0 0 0 0 12h38" transform="translate(0 7)" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+        <div class="card-frame">
+          <div class="strip"><span>channel: #musik</span><span id="voiceText">voice: belum join</span></div>
+          <div class="demo-body">
+            <div class="cmds">
+              <div class="lbl">Slash command</div>
+              <button class="cmd" data-cmd="play"><span class="box"><svg class="icon"><use href="#i-check"/></svg></span>/play</button>
+              <button class="cmd" data-cmd="queue"><span class="box"><svg class="icon"><use href="#i-check"/></svg></span>/queue</button>
+              <button class="cmd" data-cmd="nowplaying"><span class="box"><svg class="icon"><use href="#i-check"/></svg></span>/nowplaying</button>
+              <button class="cmd" data-cmd="loop"><span class="box"><svg class="icon"><use href="#i-check"/></svg></span>/loop</button>
+              <button class="cmd" data-cmd="skip"><span class="box"><svg class="icon"><use href="#i-check"/></svg></span>/skip</button>
+              <button class="cmd" data-cmd="stop"><span class="box"><svg class="icon"><use href="#i-check"/></svg></span>/stop</button>
+              <span class="hint hand">/play 2-3x dulu, terus /queue</span>
+            </div>
+            <div class="chat" aria-live="polite">
+              <div class="chat-head"><span>Log</span><span id="liveTag">● idle</span></div>
+              <div class="log" id="log"></div>
+              <div class="typing" id="typing">music-dc sedang mengetik…</div>
+              <div class="input" id="input">Kirim pesan ke #musik</div>
+            </div>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <!-- ===== 02 TRACKLIST ===== -->
+    <section class="sec" id="tracklist">
+      <div class="sec-title"><span class="n">02</span><h2>Tracklist</h2><span class="sub">perjalanan satu lagu, dari /play ke voice</span></div>
+      <div class="tracks">
+        <ol class="track-list fade" id="trackList" role="tablist" aria-label="Tahapan audio"></ol>
+        <article class="card detail-card fade" id="detail" aria-live="polite"></article>
+      </div>
+
+      <div class="memo fade">
+        <div>
+          <span class="lbl">Bonus track · cerita bug</span>
           <h3>Kenapa audionya lewat 127.0.0.1?</h3>
-          <p>Versi awal nyuruh FFmpeg buka URL audio YouTube langsung. Sesekali lagu gagal dengan exit code yang nggak masuk akal. Ternyata itu kode error FFmpeg untuk HTTP 403. Sekarang yt-dlp yang download audionya, dan FFmpeg cuma baca dari server lokal.</p>
+          <p>Versi awal nyuruh FFmpeg buka URL audio YouTube langsung, dan sesekali gagal dengan exit code yang aneh. Setelah dibongkar, angka itu ternyata kode error FFmpeg buat HTTP 403. Sekarang yt-dlp yang download, dan FFmpeg cuma baca dari server lokal.</p>
         </div>
         <ol class="trace" aria-label="Penelusuran kode error">
           <li><span>$</span>ffmpeg exited with code 3436169992</li>
@@ -394,77 +543,86 @@ footer p { margin: 0; max-width: 64ch; }
           <li><span>3</span>FFERRTAG(0xF8, '4', '0', '3')</li>
           <li><span>=</span>AVERROR_HTTP_FORBIDDEN (403)</li>
         </ol>
+        <span class="hand write">403 nggak lagi!</span>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <section id="fitur">
-    <div class="wrap">
-      <div class="sec-head fade">
-        <span class="no">03</span>
-        <h2>Fitur</h2>
+    <!-- ===== 03 SPEC ===== -->
+    <section class="sec" id="spec">
+      <div class="sec-title"><span class="n">03</span><h2>Spec</h2><span class="sub">fitur</span></div>
+      <div class="spec-wrap fade" id="specWrap">
+        <table class="spec">
+          <thead><tr><th>Name</th><th>Spec</th><th>Ability</th></tr></thead>
+          <tbody>
+            <tr><td><svg class="icon"><use href="#i-globe"/></svg>Search</td><td>ytsearch1</td><td>Putar dari judul, link video, playlist, SoundCloud, Bandcamp, dll.</td></tr>
+            <tr><td><svg class="icon"><use href="#i-zap"/></svg>Playlist</td><td>--flat-playlist</td><td>182 lagu masuk antrian dalam ±4 detik.</td></tr>
+            <tr><td><svg class="icon"><use href="#i-lock"/></svg>Voice</td><td>DAVE / E2EE</td><td>@discordjs/voice 0.19, wajib di Discord sejak Maret 2026.</td></tr>
+            <tr><td><svg class="icon"><use href="#i-refresh"/></svg>yt-dlp</td><td>auto-update</td><td>Didownload ke bin/ dan di-update tiap bot start.</td></tr>
+            <tr><td><svg class="icon"><use href="#i-key"/></svg>Cookies</td><td>opsional</td><td>Buat video yang minta login. Pakai akun cadangan.</td></tr>
+            <tr><td><svg class="icon"><use href="#i-logout"/></svg>Auto-leave</td><td>2 mnt / 1 mnt</td><td>Keluar kalau antrian habis, atau voice channel kosong.</td></tr>
+            <tr><td><svg class="icon"><use href="#i-server"/></svg>Multi-server</td><td>per guild</td><td>Antrian, volume, dan loop terpisah tiap server.</td></tr>
+            <tr><td><svg class="icon"><use href="#i-alert"/></svg>Recovery</td><td>skip on error</td><td>Lagu gagal dilaporin, lalu lanjut ke lagu berikutnya.</td></tr>
+          </tbody>
+        </table>
+        <span class="stamp" aria-hidden="true">Checked<small>10 commands</small></span>
       </div>
-      <div class="feats fade">
-        <div class="feat"><svg class="icon"><use href="#i-globe"/></svg><h3>Judul, link, dan playlist</h3><p>YouTube, SoundCloud, Bandcamp, dan situs lain yang didukung yt-dlp.</p></div>
-        <div class="feat"><svg class="icon"><use href="#i-zap"/></svg><h3>Playlist besar tetap cepat</h3><p>Dibaca pakai <code>--flat-playlist</code>. Playlist 182 lagu masuk antrian dalam ±4 detik.</p></div>
-        <div class="feat"><svg class="icon"><use href="#i-lock"/></svg><h3>Voice terenkripsi (DAVE)</h3><p><code>@discordjs/voice</code> 0.19 sudah support E2EE yang wajib di Discord sejak Maret 2026.</p></div>
-        <div class="feat"><svg class="icon"><use href="#i-refresh"/></svg><h3>yt-dlp update sendiri</h3><p>Didownload ke <code>bin/</code> dan di-update tiap bot start.</p></div>
-        <div class="feat"><svg class="icon"><use href="#i-key"/></svg><h3>Cookies opsional</h3><p>Buat video yang minta login. Disarankan pakai akun Google cadangan.</p></div>
-        <div class="feat"><svg class="icon"><use href="#i-logout"/></svg><h3>Auto-leave</h3><p>Keluar 2 menit setelah antrian habis, atau 1 menit setelah voice channel kosong.</p></div>
-        <div class="feat"><svg class="icon"><use href="#i-server"/></svg><h3>Banyak server sekaligus</h3><p>Antrian, volume, dan mode loop terpisah per server.</p></div>
-        <div class="feat"><svg class="icon"><use href="#i-alert"/></svg><h3>Gagal nggak bikin crash</h3><p>Lagu yang gagal dilaporin dengan pesan aslinya, lalu bot lanjut ke lagu berikutnya.</p></div>
-      </div>
-      <div class="stack fade">
-        <span><b>discord.js</b> 14</span><span><b>DisTube</b> 5</span><span><b>@discordjs/voice</b> 0.19</span><span><b>@discordjs/opus</b> 0.11</span><span><b>yt-dlp</b></span><span><b>FFmpeg</b></span><span><b>Node</b> ≥ 22.12</span>
-      </div>
-    </div>
-  </section>
+      <p class="stack">/play · /skip · /stop · /pause · /queue · /nowplaying · /loop · /shuffle · /volume · /remove</p>
+    </section>
 
-  <section id="instalasi">
-    <div class="wrap">
-      <div class="sec-head fade">
-        <span class="no">04</span>
-        <h2>Instalasi (Windows)</h2>
-        <p>yt-dlp nggak perlu di-install, karena bot download sendiri waktu pertama start. Cookies dan troubleshooting ada di <a href="https://github.com/adrawsf/music-dc#readme">README</a>.</p>
-      </div>
-      <div class="install">
-        <div class="steps fade">
-          <div class="step">
-            <h3>Install Node.js dan FFmpeg</h3>
+    <!-- ===== 04 RELEASE ===== -->
+    <section class="sec" id="release">
+      <div class="sec-title"><span class="n">04</span><h2>Release</h2><span class="sub">instalasi di windows</span></div>
+      <div class="release">
+        <ol class="steps fade">
+          <li>
+            <h3>Install Node.js &amp; FFmpeg</h3>
             <p>Habis itu tutup lalu buka lagi terminal-nya supaya PATH ke-refresh.</p>
             <div class="code"><pre>winget install OpenJS.NodeJS.LTS
 winget install Gyan.FFmpeg</pre><button class="copy" type="button" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
-          </div>
-          <div class="step">
-            <h3>Clone dan isi .env</h3>
-            <p>Isi <code>DISCORD_TOKEN</code> dan <code>CLIENT_ID</code> dari Discord Developer Portal.</p>
+          </li>
+          <li>
+            <h3>Clone &amp; isi .env</h3>
+            <p>Isi DISCORD_TOKEN dan CLIENT_ID dari Discord Developer Portal.</p>
             <div class="code"><pre>git clone https://github.com/adrawsf/music-dc.git
 cd music-dc
 copy .env.example .env</pre><button class="copy" type="button" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
-          </div>
-          <div class="step">
-            <h3>Install, daftarkan command, jalankan</h3>
-            <p>Lalu masuk voice channel dan ketik <code>/play</code>.</p>
+          </li>
+          <li>
+            <h3>Install, daftarkan, jalankan</h3>
+            <p>Lalu masuk voice channel dan ketik /play.</p>
             <div class="code"><pre>npm install
 npm run deploy
 npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
+          </li>
+        </ol>
+        <div class="reqs fade">
+          <span class="lbl">Requires</span>
+          <div class="req-row">
+            <b>System</b>
+            <svg class="brace" viewBox="0 0 18 54" aria-hidden="true"><path d="M14 2c-5 0-6 3-6 8v8c0 4-2 8-6 9 4 1 6 5 6 9v8c0 5 1 8 6 8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            <dl><dt>Node</dt><dd>≥ 22.12</dd><dt>FFmpeg</dt><dd>winget</dd></dl>
           </div>
-        </div>
-        <div class="term fade" aria-label="Contoh output terminal">
-          <div class="term-head"><span>PowerShell</span><button type="button" id="termReplay"><svg class="icon"><use href="#i-rotate"/></svg>ulangi</button></div>
-          <div class="term-body" id="term"></div>
+          <div class="req-row">
+            <b>Auto</b>
+            <svg class="brace" viewBox="0 0 18 54" aria-hidden="true"><path d="M14 2c-5 0-6 3-6 8v8c0 4-2 8-6 9 4 1 6 5 6 9v8c0 5 1 8 6 8" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+            <dl><dt>yt-dlp</dt><dd>bin/ · auto</dd><dt>Java</dt><dd>nggak perlu</dd></dl>
+          </div>
+          <span class="hand write">cookies &amp; troubleshooting → README</span>
         </div>
       </div>
-    </div>
-  </section>
-</main>
+    </section>
 
-<footer>
-  <div class="wrap">
-    <p>Streaming dari YouTube melanggar ToS YouTube. Pakai buat server pribadi atau tongkrongan, jangan dipublikasikan atau dimonetisasi. Nggak berafiliasi dengan Discord maupun YouTube.</p>
-    <a class="gh" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener"><svg class="icon fill"><use href="#i-github"/></svg>adrawsf/music-dc</a>
+    <!-- ===== FOOTER ===== -->
+    <footer class="foot">
+      <div class="barcode" aria-hidden="true"><svg class="icon fill" style="width:14px;height:14px"><use href="#i-star"/></svg><div class="bars" id="bars"></div></div>
+      <div>
+        <div class="fine">Nggak berafiliasi dengan Discord maupun YouTube. Jangan dipublikasikan atau dimonetisasi.</div>
+        <div class="code-no">26-11-21-MDC</div>
+      </div>
+      <a class="gh" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener"><svg class="icon fill"><use href="#i-github"/></svg>adrawsf/music-dc</a>
+    </footer>
   </div>
-</footer>
+</div>
 
 <script>
 (() => {
@@ -476,19 +634,65 @@ npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const icon = (id, cls = 'icon') => `<svg class="${cls}"><use href="#i-${id}"/></svg>`;
 
-  /* fade-in */
-  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.1 });
+  /* ---------- fade + tulisan tangan ---------- */
+  const io = new IntersectionObserver((es) => es.forEach((e) => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('in');
+    $$('.write', e.target).forEach((w) => w.classList.add('in'));
+    io.unobserve(e.target);
+  }), { threshold: 0.15 });
   $$('.fade').forEach((el) => io.observe(el));
+  setTimeout(() => $('#heroHand').classList.add('in'), 500);
 
-  /* ---------- demo state (dipakai juga oleh osiloskop) ---------- */
+  /* ---------- kilap plastik + kartu miring ---------- */
+  const sleeve = $('#sleeve'), binder = $('#binder'), heroCard = $('#heroCard');
+  if (!reduceMotion) {
+    window.addEventListener('pointermove', (e) => {
+      const r = binder.getBoundingClientRect();
+      sleeve.style.setProperty('--sx', `${((e.clientX - r.left) / r.width) * 100}%`);
+      sleeve.style.setProperty('--sy', `${((e.clientY - r.top) / r.height) * 100}%`);
+      const c = heroCard.getBoundingClientRect();
+      const dx = (e.clientX - (c.left + c.width / 2)) / window.innerWidth;
+      const dy = (e.clientY - (c.top + c.height / 2)) / window.innerHeight;
+      heroCard.style.setProperty('--ry', `${(dx * 9).toFixed(2)}deg`);
+      heroCard.style.setProperty('--rx', `${(-dy * 7).toFixed(2)}deg`);
+    }, { passive: true });
+  }
+
+  /* ---------- stempel ---------- */
+  const stampbox = $('#stampbox'), stamp = $('#stamp');
+  const STAMPS = [['No Lavalink', '1 proses node'], ['On Air', 'yt-dlp → ffmpeg'], ['Approved', 'anti 403'], ['Live', '48 kHz stereo']];
+  let stampIdx = 0;
+  stampbox.addEventListener('click', () => {
+    stampIdx = (stampIdx + 1) % STAMPS.length;
+    const [big, small] = STAMPS[stampIdx];
+    stamp.innerHTML = `${esc(big)}<small>${esc(small)}</small>`;
+    stamp.style.setProperty('--r', `${(Math.random() * 16 - 12).toFixed(1)}deg`);
+    stamp.classList.remove('thunk'); void stamp.offsetWidth; stamp.classList.add('thunk');
+  });
+
+  /* ---------- pita biru ---------- */
+  const ribbonText = 'music-dc · discord music bot · self-hosted · tanpa lavalink · yt-dlp → ffmpeg → opus';
+  $('#ribbon').innerHTML = Array.from({ length: 8 }, () => `<span>${ribbonText}</span>`).join('');
+
+  /* ---------- barcode ---------- */
+  const bars = $('#bars');
+  let seed = 1106;
+  const rnd = () => ((seed = (seed * 9301 + 49297) % 233280) / 233280);
+  for (let i = 0; i < 46; i++) {
+    const b = document.createElement('i');
+    b.style.width = `${1 + Math.floor(rnd() * 3)}px`;
+    b.style.marginRight = `${1 + Math.floor(rnd() * 2)}px`;
+    bars.appendChild(b);
+  }
+
+  /* ---------- state demo (dipakai osiloskop) ---------- */
   const st = { current: null, pos: 0, queue: [], loop: 0, next: 0, inVoice: false };
 
-  /* ---------- osiloskop ---------- */
-  const cv = $('#scope'), g = cv.getContext('2d');
-  const scopeState = $('#scopeState'), scopeLive = $('#scopeLive'), scopeRead = $('#scopeRead'), scopeTrack = $('#scopeTrack');
-  const ptr = { x: 0.35, y: 0.5, tx: 0.35, ty: 0.5 };
-  let W = 0, H = 0, energy = 0, scopeVisible = true;
-
+  /* ---------- osiloskop hitam-putih ---------- */
+  const cv = $('#scope'), g = cv.getContext('2d'), scopeCap = $('#scopeCap');
+  const ptr = { x: 0.35, y: 0.45, tx: 0.35, ty: 0.45 };
+  let W = 0, H = 0, energy = 0.2, scopeVisible = true;
   function sizeScope() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
     W = cv.clientWidth; H = cv.clientHeight;
@@ -497,63 +701,64 @@ npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="
   }
   window.addEventListener('resize', sizeScope);
   sizeScope();
-  window.addEventListener('pointermove', (e) => {
-    ptr.tx = e.clientX / window.innerWidth;
-    ptr.ty = e.clientY / window.innerHeight;
-  }, { passive: true });
-
-  function grid() {
-    g.fillStyle = '#0b0b0a'; g.fillRect(0, 0, W, H);
-    g.strokeStyle = '#1e1e1b'; g.lineWidth = 1;
-    const cols = 10, rows = 6;
-    g.beginPath();
-    for (let i = 1; i < cols; i++) { const x = Math.round((W / cols) * i) + 0.5; g.moveTo(x, 0); g.lineTo(x, H); }
-    for (let j = 1; j < rows; j++) { const y = Math.round((H / rows) * j) + 0.5; g.moveTo(0, y); g.lineTo(W, y); }
-    g.stroke();
-    g.strokeStyle = '#2a2a26';
-    g.beginPath(); g.moveTo(0, Math.round(H / 2) + 0.5); g.lineTo(W, Math.round(H / 2) + 0.5); g.stroke();
-  }
-
+  window.addEventListener('pointermove', (e) => { ptr.tx = e.clientX / window.innerWidth; ptr.ty = e.clientY / window.innerHeight; }, { passive: true });
   function frame(now) {
     if (!reduceMotion) requestAnimationFrame(frame);
     if (!scopeVisible && !reduceMotion) return;
     const t = now / 1000;
     ptr.x += (ptr.tx - ptr.x) * 0.06; ptr.y += (ptr.ty - ptr.y) * 0.06;
-    const playing = !!st.current;
-    energy += ((playing ? 1 : 0.18) - energy) * 0.03;
-
-    grid();
-    const cycles = 1.5 + ptr.x * 5;
-    const amp = (0.12 + (1 - ptr.y) * 0.3) * energy * H;
-    const mid = H / 2;
-    g.lineWidth = 2; g.strokeStyle = '#ff6a2b'; g.lineJoin = 'round';
-    g.beginPath();
+    energy += ((st.current ? 1 : 0.2) - energy) * 0.03;
+    g.fillStyle = '#0d0d0d'; g.fillRect(0, 0, W, H);
+    g.strokeStyle = '#262626'; g.lineWidth = 1; g.beginPath();
+    for (let i = 1; i < 8; i++) { const x = Math.round((W / 8) * i) + 0.5; g.moveTo(x, 0); g.lineTo(x, H); }
+    for (let j = 1; j < 6; j++) { const y = Math.round((H / 6) * j) + 0.5; g.moveTo(0, y); g.lineTo(W, y); }
+    g.stroke();
+    const mid = H * 0.62, cycles = 1.5 + ptr.x * 5, amp = (0.1 + (1 - ptr.y) * 0.22) * energy * H;
+    g.strokeStyle = '#ecece8'; g.lineWidth = 2; g.lineJoin = 'round'; g.beginPath();
     for (let x = 0; x <= W; x += 2) {
       const p = (x / W) * Math.PI * 2 * cycles;
       let y = Math.sin(p + t * 3) + 0.35 * Math.sin(p * 2.01 - t * 5) + 0.18 * Math.sin(p * 3.7 + t * 2);
-      if (playing) y += 0.22 * Math.sin(p * 9 + t * 11) * Math.sin(t * 1.7);
-      y = y / 1.6;
+      if (st.current) y += 0.22 * Math.sin(p * 9 + t * 11) * Math.sin(t * 1.7);
+      y /= 1.6;
       x === 0 ? g.moveTo(x, mid - y * amp) : g.lineTo(x, mid - y * amp);
     }
     g.stroke();
-    // trigger marker
-    g.fillStyle = '#ff6a2b';
-    g.beginPath(); g.moveTo(0, mid - 5); g.lineTo(6, mid); g.lineTo(0, mid + 5); g.fill();
-
-    const hz = Math.round(110 * Math.pow(2, ptr.x * 4));
-    scopeRead.textContent = `${hz} Hz · ${Math.round(amp / (H / 2) * 100)}%`;
   }
   new IntersectionObserver(([e]) => { scopeVisible = e.isIntersecting; }).observe(cv);
   requestAnimationFrame(frame);
-
   function syncScope() {
-    scopeLive.classList.toggle('on', !!st.current);
-    scopeState.textContent = st.current ? 'PLAYING' : st.inVoice ? 'IDLE · di voice' : 'IDLE';
-    scopeTrack.textContent = st.current ? `${st.current.t} — ${st.current.a}` : '—';
+    scopeCap.textContent = st.current ? `fig. 01 · playing · ${st.current.t}` : `fig. 01 · out 48 kHz · ${st.inVoice ? 'idle di voice' : 'idle'}`;
     if (reduceMotion) frame(0);
   }
 
-  /* ---------- chat demo ---------- */
+  /* ---------- terminal ---------- */
+  const TERM = [
+    ['cmd', 'npm start'],
+    ['d', '\n> discord-music-bot@1.0.0 start\n> node src/index.js\n\n'],
+    ['', '🎞️  FFmpeg OK\n'],
+    ['', '🔄 yt-dlp: yt-dlp is up to date\n'],
+    ['', '📼 yt-dlp 2026.10.26\n'],
+    ['', '✅ Logged in as music-dc#0001\n   (3 server)\n'],
+  ];
+  const term = $('#term');
+  async function playTerm() {
+    term.innerHTML = '';
+    for (const [kind, text] of TERM) {
+      if (kind === 'cmd') {
+        const p = document.createElement('span'); p.className = 'p'; p.textContent = 'PS C:\\music-dc> '; term.appendChild(p);
+        const c = document.createElement('span'); term.appendChild(c);
+        for (let i = 1; i <= text.length; i++) { c.textContent = text.slice(0, i); await sleep(70); }
+        await sleep(300);
+      } else {
+        const s = document.createElement('span'); if (kind) s.className = kind; s.textContent = text; term.appendChild(s);
+        await sleep(kind === 'd' ? 450 : 650);
+      }
+    }
+    const caret = document.createElement('span'); caret.className = 'caret'; term.appendChild(caret);
+  }
+  setTimeout(playTerm, 700);
+
+  /* ---------- demo chat ---------- */
   const SONGS = [
     { t: 'Lampu Kota Jam Dua', a: 'Senandika', d: 214 },
     { t: 'Hujan di Kaliurang', a: 'Kopi Pagi', d: 187 },
@@ -565,8 +770,7 @@ npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="
   const LOOP_LABEL = ['off', '🔂 lagu', '🔁 queue'];
   const LOOP_MSG = ['➡️ Loop mati', '🔂 Loop lagu ini', '🔁 Loop seluruh queue'];
   const SPEED = 3;
-
-  const log = $('#log'), typing = $('#typing'), input = $('#input'), voice = $('#voice'), voiceText = $('#voiceText');
+  const log = $('#log'), typing = $('#typing'), input = $('#input'), voiceText = $('#voiceText'), liveTag = $('#liveTag');
   const buttons = $$('.cmd');
   let busy = false, userTookOver = false;
 
@@ -574,27 +778,26 @@ npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="
   const bar = (pos, len, size = 15) => { const f = Math.round(Math.min(pos / len, 1) * size); return '▬'.repeat(f) + '🔘' + '▬'.repeat(Math.max(size - f, 0)); };
   const line = (s) => `<a href="#demo" onclick="return false">${esc(s.t)}</a> <span class="dur">${fmt(s.d)}</span>`;
   const clock = () => new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-  const embed = (html, cls = '') => `<div class="embed ${cls}">${html}</div>`;
-  const eph = (text) => `<div class="eph">${text}<small>${icon('eye')}Cuma kamu yang bisa lihat pesan ini</small></div>`;
+  const slip = (html, cls = '') => `<div class="slip ${cls}">${html}</div>`;
+  const eph = (text) => `<div class="eph">${text}<small>${icon('eye')}cuma kamu yang bisa lihat</small></div>`;
 
   function setVoice() {
-    voice.classList.toggle('on', !!st.current);
-    voiceText.textContent = st.current ? 'memutar di Nongkrong' : st.inVoice ? 'di Nongkrong, idle' : 'belum di voice';
+    voiceText.textContent = st.current ? 'voice: memutar di nongkrong' : st.inVoice ? 'voice: nongkrong (idle)' : 'voice: belum join';
+    liveTag.textContent = st.current ? '● on air' : '● idle';
+    liveTag.classList.toggle('on', !!st.current);
     syncScope();
   }
   function add(who, html) {
     const m = document.createElement('div');
     m.className = 'msg';
-    m.innerHTML = who === 'user'
-      ? `<div class="av user">${icon('user')}</div><div class="body"><div class="meta"><b>kamu</b><time>${clock()}</time></div>${html}</div>`
-      : `<div class="av bot">${icon('music')}</div><div class="body"><div class="meta"><b>music-dc</b><span class="tag">BOT</span><time>${clock()}</time></div>${html}</div>`;
+    m.innerHTML = `<div class="who">${who === 'user' ? 'kamu' : 'music-dc'}<small>${clock()}</small></div><div>${html}</div>`;
     log.appendChild(m);
     while (log.children.length > 40) log.firstElementChild.remove();
     log.scrollTop = log.scrollHeight;
   }
-  const npEmbed = (s) => embed(`🎶 <b>Now playing:</b> ${line(s)}<br>Requested by <span class="mention">@kamu</span>`);
-  const liveEmbed = (s) => embed(
-    `<div>🎶 ${line(s)}<br><span style="color:var(--muted)">${esc(s.a)}</span><br><br>` +
+  const npSlip = (s) => slip(`🎶 <b>Now playing:</b> ${line(s)}<br>Requested by <span class="mention">@kamu</span>`);
+  const liveSlip = (s) => slip(
+    `<div>🎶 ${line(s)}<br><span style="color:var(--ink-3)">${esc(s.a)}</span><br><br>` +
     `<span class="bar" data-live>${bar(st.pos, s.d)}</span><br><span class="dur" data-live-time>${fmt(st.pos)} / ${fmt(s.d)}</span><br>🔊 60%</div>` +
     `<div class="art">${icon('music')}</div>`, 'thumb');
 
@@ -608,71 +811,70 @@ npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="
     await sleep(220);
     input.classList.remove('active');
     input.textContent = 'Kirim pesan ke #musik';
-    add('user', `<span class="slash"><span class="n">/${esc(name)}</span>${arg ? ` <span class="a">${esc(arg)}</span>` : ''}</span>`);
+    add('user', `<span class="slash">/${esc(name)}${arg ? ` <span class="a">${esc(arg)}</span>` : ''}</span>`);
   }
   async function think(ms) { typing.classList.add('on'); log.scrollTop = log.scrollHeight; await sleep(ms); typing.classList.remove('on'); }
-
-  function startSong(s) { st.current = s; st.pos = 0; st.inVoice = true; setVoice(); add('bot', npEmbed(s)); }
-  function finishQueue() { st.current = null; setVoice(); add('bot', embed('✅ Queue habis. Tambahin lagu pakai <code>/play</code>, atau gue cabut dalam 2 menit.')); }
+  function startSong(s) { st.current = s; st.pos = 0; st.inVoice = true; setVoice(); add('bot', npSlip(s)); }
+  function finishQueue() { st.current = null; setVoice(); add('bot', slip('✅ Queue habis. Tambahin lagu pakai <code>/play</code>, atau gue cabut dalam 2 menit.')); }
   const noPlayer = () => add('bot', eph('❌ Lagi nggak ada lagu yang diputar.'));
 
   const commands = {
     async play() {
       const s = SONGS[st.next++ % SONGS.length];
-      await typeCmd('play', s.t.toLowerCase());
-      await think(900);
-      if (!st.current) { add('bot', embed(`▶️ Memutar ${line(s)}`)); await sleep(400); startSong(s); }
-      else { st.queue.push(s); add('bot', embed(`➕ Masuk queue (#${st.queue.length}): ${line(s)}`)); }
+      await typeCmd('play', s.t.toLowerCase()); await think(900);
+      if (!st.current) { add('bot', slip(`▶️ Memutar ${line(s)}`)); await sleep(400); startSong(s); }
+      else { st.queue.push(s); add('bot', slip(`➕ Masuk queue (#${st.queue.length}): ${line(s)}`)); }
     },
     async queue() {
       await typeCmd('queue'); await think(450);
       if (!st.current) return noPlayer();
       const list = st.queue.length ? st.queue.map((s, i) => `<code>${i + 1}.</code> ${line(s)}`).join('<br>') : '<i>Queue kosong</i>';
       const total = st.queue.reduce((a, s) => a + s.d, 0);
-      add('bot', embed(`<b>Now playing:</b> ${line(st.current)}<br><br>${list}<br><br>${st.queue.length} lagu • total ${fmt(total)} • loop: ${LOOP_LABEL[st.loop]}<div class="foot">Halaman 1/1</div>`));
+      add('bot', slip(`<b>Now playing:</b> ${line(st.current)}<br><br>${list}<br><br>${st.queue.length} lagu • total ${fmt(total)} • loop: ${LOOP_LABEL[st.loop]}<div class="foot">Halaman 1/1</div>`));
     },
     async nowplaying() {
       await typeCmd('nowplaying'); await think(450);
       if (!st.current) return noPlayer();
       $$('[data-live]').forEach((el) => el.removeAttribute('data-live'));
       $$('[data-live-time]').forEach((el) => el.removeAttribute('data-live-time'));
-      add('bot', liveEmbed(st.current));
+      add('bot', liveSlip(st.current));
     },
     async loop() {
       const mode = (st.loop + 1) % 3;
       await typeCmd('loop', ['off', 'lagu ini', 'seluruh queue'][mode]); await think(400);
       if (!st.current) return noPlayer();
-      st.loop = mode; add('bot', embed(LOOP_MSG[mode]));
+      st.loop = mode; add('bot', slip(LOOP_MSG[mode]));
     },
     async skip() {
       await typeCmd('skip'); await think(500);
       if (!st.current) return noPlayer();
       const skipped = st.current;
-      add('bot', embed(`⏭️ Skip <b>${esc(skipped.t)}</b>`));
+      add('bot', slip(`⏭️ Skip <b>${esc(skipped.t)}</b>`));
       if (st.loop === 2) st.queue.push(skipped);
-      const next = st.queue.shift();
+      const n = st.queue.shift();
       await sleep(350);
-      next ? startSong(next) : finishQueue();
+      n ? startSong(n) : finishQueue();
     },
     async stop() {
       await typeCmd('stop'); await think(400);
       if (!st.inVoice) return noPlayer();
       Object.assign(st, { current: null, queue: [], loop: 0, inVoice: false });
-      setVoice(); add('bot', embed('⏹️ Stop. Sampai jumpa!'));
+      setVoice(); add('bot', slip('⏹️ Stop. Sampai jumpa!'));
     },
   };
-  async function run(name) {
+  async function run(btn) {
     if (busy) return;
     busy = true; buttons.forEach((b) => (b.disabled = true));
-    try { await commands[name](); } finally { busy = false; buttons.forEach((b) => (b.disabled = false)); }
+    try { await commands[btn.dataset.cmd](); btn.classList.add('done'); }
+    finally { busy = false; buttons.forEach((b) => (b.disabled = false)); }
   }
-  buttons.forEach((b) => b.addEventListener('click', () => { userTookOver = true; run(b.dataset.cmd); }));
+  buttons.forEach((b) => b.addEventListener('click', () => { userTookOver = true; run(b); }));
 
   setInterval(() => {
     if (!st.current || document.hidden) return;
     st.pos += SPEED;
     if (st.pos >= st.current.d) {
-      if (st.loop === 1) { st.pos = 0; add('bot', npEmbed(st.current)); }
+      if (st.loop === 1) { st.pos = 0; add('bot', npSlip(st.current)); }
       else { if (st.loop === 2) st.queue.push(st.current); const n = st.queue.shift(); n ? startSong(n) : finishQueue(); }
     }
     if (!st.current) return;
@@ -680,46 +882,54 @@ npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="
     $$('[data-live-time]').forEach((el) => (el.textContent = `${fmt(st.pos)} / ${fmt(st.current.d)}`));
   }, 1000);
 
-  add('bot', embed('Halo. Klik command di sebelah buat nyoba.'));
+  add('bot', slip('Halo. Centang command di kiri buat nyoba.'));
   let autoplayed = false;
   new IntersectionObserver(async ([e], obs) => {
     if (!e.isIntersecting || autoplayed) return;
     autoplayed = true; obs.disconnect();
     if (reduceMotion) return;
     await sleep(600);
-    for (const c of ['play', 'play', 'queue']) { if (userTookOver) break; await run(c); await sleep(800); }
-  }, { threshold: 0.5 }).observe($('.chat'));
+    for (const c of ['play', 'play', 'queue']) {
+      if (userTookOver) break;
+      await run(buttons.find((b) => b.dataset.cmd === c));
+      await sleep(800);
+    }
+  }, { threshold: 0.4 }).observe($('.chat'));
 
-  /* ---------- tahapan ---------- */
-  const STAGES = [
-    { i: 'user', t: '/play', s: 'slash command', h: 'Command masuk', p: 'Bot langsung deferReply supaya punya waktu lebih dari 3 detik buat jawab. Lalu dia ngecek kamu ada di voice channel yang sama, dan bot punya izin View Channel, Connect, dan Speak.', c: '/play query: lampu kota jam dua' },
-    { i: 'bot', t: 'Bot', s: 'discord.js + DisTube', h: 'DisTube ngatur antrian', p: 'Antrian, loop, shuffle, volume, dan auto-leave disimpan per server. Satu-satunya extractor yang dipasang adalah plugin yt-dlp di src/ytdlp.js.', c: 'new DisTube(client, {\n  plugins: [new YtDlpPlugin()],\n})' },
-    { i: 'download', t: 'yt-dlp', s: 'cari dan download', h: 'yt-dlp cari dan download', p: 'Judul dicari pakai ytsearch1:, playlist dibaca pakai --flat-playlist. Waktu lagu mau diputar, yt-dlp download audio terbaik ke stdout. Challenge JavaScript dari YouTube diselesaikan pakai Node yang sedang jalan.', c: 'yt-dlp --js-runtimes node \\\n  -f ba/ba*/b -o - -- <url>' },
-    { i: 'plug', t: '127.0.0.1', s: 'pipe lokal', h: 'Server HTTP lokal', p: 'Byte audio dilewatkan lewat server HTTP kecil di 127.0.0.1, pakai port acak dan token sekali pakai. FFmpeg nggak pernah konek langsung ke server YouTube.', c: 'GET http://127.0.0.1:60581/5a84…de87\n200  (request kedua: 404)' },
-    { i: 'film', t: 'FFmpeg', s: 'decode ke PCM', h: 'FFmpeg decode', p: 'Audio dari YouTube di-decode jadi PCM 48 kHz stereo. Volume 1–150% diatur di tahap ini.', c: 'ffmpeg -i <pipe> -ar 48000 -ac 2 \\\n  -f s16le pipe:1' },
-    { i: 'volume', t: 'Voice', s: 'Opus + DAVE', h: 'Dikirim ke voice channel', p: '@discordjs/opus encode PCM ke Opus, lalu @discordjs/voice 0.19 mengirimnya lewat voice yang terenkripsi end-to-end (DAVE).', c: '@discordjs/voice   0.19\n@snazzah/davey     DAVE / E2EE' },
+  /* ---------- tracklist ---------- */
+  const TRACKS = [
+    { t: '/play', s: 'slash command', h: 'Command masuk', who: 'discord.js', p: 'Bot langsung deferReply supaya punya waktu lebih dari 3 detik. Lalu ngecek kamu di voice channel yang sama, dan bot punya izin View Channel, Connect, Speak.', c: '/play query: lampu kota jam dua', n: 'batas discord cuma 3 detik, defer dulu!' },
+    { t: 'Bot', s: 'distube', h: 'Antrian per server', who: 'DisTube 5', p: 'Antrian, loop, shuffle, volume, dan auto-leave disimpan per server. Extractor satu-satunya: plugin yt-dlp di src/ytdlp.js.', c: 'new DisTube(client, {\n  plugins: [new YtDlpPlugin()],\n})', n: 'server A & B nggak rebutan' },
+    { t: 'yt-dlp', s: 'cari & download', h: 'Cari, lalu download', who: 'yt-dlp', p: 'Judul dicari pakai ytsearch1:, playlist pakai --flat-playlist. Pas lagu mau diputar, yt-dlp download audio terbaik ke stdout. Challenge JS YouTube diselesaikan pakai Node.', c: 'yt-dlp --js-runtimes node \\\n  -f ba/ba*/b -o - -- <url>', n: 'youtube error? npm run update-ytdlp' },
+    { t: '127.0.0.1', s: 'pipe lokal', h: 'Pipa lokal', who: 'node:http', p: 'Byte audio lewat server HTTP kecil di 127.0.0.1, port acak, token sekali pakai. FFmpeg nggak pernah konek langsung ke YouTube.', c: 'GET http://127.0.0.1:60581/5a84…de87\n200   (request kedua → 404)', n: 'ini yang bikin 403 hilang' },
+    { t: 'FFmpeg', s: 'decode → pcm', h: 'Decode', who: 'FFmpeg', p: 'Audio dari YouTube di-decode jadi PCM 48 kHz stereo. Volume 1–150% diatur di sini.', c: 'ffmpeg -i <pipe> -ar 48000 -ac 2 \\\n  -f s16le pipe:1', n: 'volume 150% boleh, risiko tanggung sendiri' },
+    { t: 'Voice', s: 'opus + dave', h: 'Sampai di voice', who: '@discordjs/voice', p: '@discordjs/opus encode ke Opus, lalu @discordjs/voice 0.19 kirim lewat voice terenkripsi end-to-end (DAVE).', c: '@discordjs/voice   0.19\n@snazzah/davey     DAVE / E2EE', n: 'DAVE wajib sejak maret 2026' },
   ];
-  const stages = $('#stages'), detail = $('#detail');
-  STAGES.forEach((s, i) => {
-    const b = document.createElement('button');
-    b.type = 'button'; b.className = 'stage'; b.setAttribute('role', 'tab');
-    b.innerHTML = `${icon(s.i)}<span class="k">${String(i + 1).padStart(2, '0')}</span><b>${esc(s.t)}</b><span>${esc(s.s)}</span>` +
-      (i < STAGES.length - 1 ? icon('chevron', 'icon arrow') : '');
-    b.addEventListener('click', () => { pinned = true; select(i); });
-    stages.appendChild(b);
+  const trackList = $('#trackList'), detail = $('#detail');
+  TRACKS.forEach((k, i) => {
+    const li = document.createElement('li');
+    li.innerHTML = `<button class="track" type="button" role="tab"><span class="tn">${String(i + 1).padStart(2, '0')}</span><span class="tt">${esc(k.t)}</span><span class="lead"></span><span class="ts">${esc(k.s)}</span></button>`;
+    li.firstElementChild.addEventListener('click', () => { pinned = true; select(i); });
+    trackList.appendChild(li);
   });
-  const stageEls = $$('.stage', stages);
-  let active = -1, pinned = false, stagesVisible = false;
+  const trackEls = $$('.track', trackList);
+  let active = -1, pinned = false, tracksVisible = false;
+  const clipSvg = '<svg class="clip" viewBox="0 0 66 26" aria-hidden="true" style="top:22px"><path d="M4 13h50a8 8 0 0 0 0-16H14a6 6 0 0 0 0 12h38" transform="translate(0 7)" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>';
   function select(i) {
     if (i === active) return;
     active = i;
-    stageEls.forEach((el, k) => { el.classList.toggle('active', k === i); el.setAttribute('aria-selected', String(k === i)); });
-    const s = STAGES[i];
-    detail.innerHTML = `<div class="swap"><h3>${esc(s.h)}</h3><p>${esc(s.p)}</p></div><pre class="swap">${esc(s.c)}</pre>`;
+    trackEls.forEach((el, k) => { el.classList.toggle('active', k === i); el.setAttribute('aria-selected', String(k === i)); });
+    const k = TRACKS[i];
+    detail.innerHTML = `${clipSvg}<div class="card-frame swap">
+      <div class="card-head"><span class="num">${String(i + 1).padStart(2, '0')}</span><span class="ttl">${esc(k.h)}</span></div>
+      <div class="strip"><span>music-dc tracklist</span><span>${esc(k.t)} · ${esc(k.s)}</span></div>
+      <dl class="card-fields"><dt>Handled by</dt><dd>${esc(k.who)}</dd><dt>Process</dt><dd style="font-family:var(--sans);font-size:14px">${esc(k.p)}</dd><dt>Code</dt><dd><pre>${esc(k.c)}</pre></dd></dl>
+      <div class="comment"><span class="lbl">Comment</span><span class="hand write in">${esc(k.n)}</span></div>
+    </div>`;
   }
   select(0);
-  new IntersectionObserver(([e]) => { stagesVisible = e.isIntersecting; }, { threshold: 0.4 }).observe(stages);
-  if (!reduceMotion) setInterval(() => { if (!pinned && stagesVisible && !document.hidden) select((active + 1) % STAGES.length); }, 4000);
+  new IntersectionObserver(([e]) => { tracksVisible = e.isIntersecting; }, { threshold: 0.4 }).observe(trackList);
+  if (!reduceMotion) setInterval(() => { if (!pinned && tracksVisible && !document.hidden) select((active + 1) % TRACKS.length); }, 4500);
 
   /* ---------- copy ---------- */
   $$('.copy').forEach((b) => b.addEventListener('click', async () => {
@@ -736,38 +946,6 @@ npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="
     b.setAttribute('aria-label', ok ? 'Tersalin' : 'Gagal copy');
     setTimeout(() => { b.innerHTML = icon('copy'); b.classList.remove('ok'); b.setAttribute('aria-label', 'Copy'); }, 1500);
   }));
-
-  /* ---------- terminal ---------- */
-  const TERM = [
-    ['cmd', 'npm start'],
-    ['d', '\n> discord-music-bot@1.0.0 start\n> node src/index.js\n\n'],
-    ['', '🎞️  FFmpeg OK\n'],
-    ['', '🔄 yt-dlp: yt-dlp is up to date (stable@2026.10.26)\n'],
-    ['', '📼 yt-dlp 2026.10.26\n'],
-    ['', '✅ Logged in as music-dc#0001 (3 server)\n'],
-  ];
-  const term = $('#term');
-  let runId = 0;
-  async function playTerm() {
-    const id = ++runId;
-    term.innerHTML = '';
-    for (const [kind, text] of TERM) {
-      if (kind === 'cmd') {
-        const p = document.createElement('span'); p.className = 'p'; p.textContent = 'PS C:\\music-dc> '; term.appendChild(p);
-        const c = document.createElement('span'); term.appendChild(c);
-        for (let i = 1; i <= text.length; i++) { if (id !== runId) return; c.textContent = text.slice(0, i); await sleep(65); }
-        await sleep(300);
-      } else {
-        const s = document.createElement('span'); if (kind) s.className = kind; s.textContent = text; term.appendChild(s);
-        await sleep(kind === 'd' ? 450 : 600);
-      }
-      if (id !== runId) return;
-    }
-    const caret = document.createElement('span'); caret.className = 'caret'; term.appendChild(caret);
-  }
-  let termStarted = false;
-  new IntersectionObserver(([e], obs) => { if (e.isIntersecting && !termStarted) { termStarted = true; obs.disconnect(); playTerm(); } }, { threshold: 0.4 }).observe(term);
-  $('#termReplay').addEventListener('click', playTerm);
 })();
 </script>
 </body>
