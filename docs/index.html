@@ -4,549 +4,455 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>music-dc</title>
-<meta name="description" content="Bot musik Discord self-hosted: discord.js + DisTube + yt-dlp + FFmpeg dalam satu proses Node. Tanpa Lavalink, tanpa Java, tanpa Docker.">
+<meta name="description" content="Bot musik Discord self-hosted: discord.js + DisTube + yt-dlp + FFmpeg dalam satu proses Node. Tanpa Lavalink.">
 <meta property="og:title" content="music-dc">
-<meta property="og:description" content="Bot musik Discord self-hosted tanpa Lavalink. Satu proses Node, yt-dlp, dan FFmpeg.">
+<meta property="og:description" content="Bot musik Discord self-hosted. Satu proses Node, yt-dlp, dan FFmpeg.">
 <meta property="og:type" content="website">
-<meta name="theme-color" content="#07070c">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎧</text></svg>">
+<meta name="theme-color" content="#0f0f0e">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23ff6a2b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><path d='M9 18V5l11-2v13'/><circle cx='6' cy='18' r='3'/><circle cx='17' cy='16' r='3'/></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root {
   color-scheme: dark;
-  --bg: #07070c;
-  --bg-2: #0c0c14;
-  --surface: #11111b;
-  --surface-2: #171724;
-  --border: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.16);
-  --text: #ecebf5;
-  --muted: #9b99b3;
-  --faint: #6c6a85;
-  --violet: #8b5cf6;
-  --pink: #ec4899;
-  --cyan: #22d3ee;
-  --green: #34d399;
-  --amber: #fbbf24;
-  --red: #f87171;
-  --grad: linear-gradient(110deg, var(--violet), var(--pink) 50%, var(--cyan));
-  --radius: 18px;
-  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
-  --sans: 'Space Grotesk', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --bg: #0f0f0e;
+  --surface: #161614;
+  --surface-2: #1d1d1a;
+  --line: #2a2a26;
+  --line-2: #3a3a35;
+  --text: #e9e7e1;
+  --muted: #9b988f;
+  --faint: #6d6a62;
+  --accent: #ff6a2b;
+  --accent-dim: rgba(255, 106, 43, 0.12);
+  --ok: #7bc58b;
+  --err: #ef7a6b;
+  --link: #6ea8fe;
+  --embed: #5865f2;
+  --sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Consolas, monospace;
   --gutter: clamp(16px, 4vw, 40px);
 }
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
 body {
-  margin: 0;
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 17px;
-  line-height: 1.6;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.6 var(--sans); overflow-x: hidden; -webkit-font-smoothing: antialiased;
 }
 a { color: inherit; }
-code, pre, kbd { font-family: var(--mono); }
-::selection { background: rgba(139, 92, 246, 0.45); }
-.wrap { width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 var(--gutter); }
-.grad-text { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
+code, pre { font-family: var(--mono); font-size: .92em; }
+::selection { background: var(--accent); color: #111; }
+.wrap { width: 100%; max-width: 1120px; margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter); }
+.icon { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.icon.fill { fill: currentColor; stroke: none; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ---------- nav ---------- */
-.nav {
-  position: fixed; inset: 0 0 auto 0; z-index: 50;
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  background: rgba(7, 7, 12, 0.55);
-  border-bottom: 1px solid transparent;
-  transition: border-color .3s, background .3s;
-}
-.nav.scrolled { border-bottom-color: var(--border); background: rgba(7, 7, 12, 0.8); }
-.nav .wrap { display: flex; align-items: center; gap: 24px; height: 64px; }
-.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; text-decoration: none; letter-spacing: -0.02em; }
-.logo-mark {
-  width: 30px; height: 30px; border-radius: 9px; background: var(--grad);
-  display: grid; place-items: center; font-size: 15px; box-shadow: 0 0 24px rgba(236, 72, 153, 0.35);
-}
-.nav-links { display: flex; gap: 22px; margin-left: auto; }
-.nav-links a { text-decoration: none; color: var(--muted); font-size: 15px; transition: color .2s; }
-.nav-links a:hover { color: var(--text); }
+/* ---------- header ---------- */
+.top { position: sticky; top: 0; z-index: 20; background: rgba(15, 15, 14, 0.92); border-bottom: 1px solid var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 28px; height: 56px; }
+.brand { display: flex; align-items: center; gap: 9px; font-weight: 600; text-decoration: none; }
+.brand .icon { color: var(--accent); width: 20px; height: 20px; }
+.top nav { display: flex; gap: 22px; margin-left: auto; font-size: 14px; }
+.top nav a { color: var(--muted); text-decoration: none; }
+.top nav a:hover { color: var(--text); }
+.gh { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; color: var(--muted); text-decoration: none; }
+.gh:hover { color: var(--text); }
+
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 11px 18px; border-radius: 12px; border: 1px solid var(--border-strong);
-  background: rgba(255, 255, 255, 0.04); color: var(--text);
-  font: 600 15px/1 var(--sans); text-decoration: none; cursor: pointer;
-  transition: transform .2s, background .2s, border-color .2s, box-shadow .2s;
+  display: inline-flex; align-items: center; gap: 8px; padding: 10px 16px; border-radius: 6px;
+  border: 1px solid var(--line-2); background: transparent; color: var(--text);
+  font: 500 15px/1 var(--sans); text-decoration: none; cursor: pointer;
 }
-.btn:hover { transform: translateY(-1px); background: rgba(255, 255, 255, 0.08); }
-.btn:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--cyan); outline-offset: 2px; }
-.btn-primary { background: var(--grad); border-color: transparent; color: #fff; box-shadow: 0 8px 32px rgba(139, 92, 246, 0.35); }
-.btn-primary:hover { background: var(--grad); box-shadow: 0 10px 40px rgba(236, 72, 153, 0.45); }
-.btn svg { width: 18px; height: 18px; }
-.nav .btn { padding: 9px 14px; font-size: 14px; }
+.btn:hover { border-color: var(--muted); }
+.btn-primary { background: var(--accent); border-color: var(--accent); color: #140a05; }
+.btn-primary:hover { background: #ff7d45; border-color: #ff7d45; }
 
 /* ---------- hero ---------- */
-.hero { position: relative; min-height: 100svh; display: grid; align-items: center; overflow: hidden; isolation: isolate; }
-#viz { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
-.hero::after {
-  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
-  background:
-    radial-gradient(ellipse 34% 26% at 50% 58%, rgba(7, 7, 12, 0.62), transparent 100%),
-    radial-gradient(ellipse 60% 50% at 50% 45%, transparent 30%, rgba(7, 7, 12, 0.55) 75%),
-    linear-gradient(to bottom, transparent 70%, var(--bg));
-}
-.hero-inner { text-align: center; padding-top: 120px; padding-bottom: 80px; }
-.eyebrow {
-  display: inline-flex; align-items: center; gap: 10px; padding: 7px 14px 7px 10px; border-radius: 999px;
-  background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border-strong);
-  font-size: 14px; color: var(--muted); backdrop-filter: blur(6px);
-}
-.eyebrow .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); box-shadow: 0 0 12px var(--green); animation: pulse 2s infinite; }
-@keyframes pulse { 50% { opacity: .35; } }
-.hero h1 {
-  font-size: clamp(42px, 8.5vw, 104px); line-height: .98; letter-spacing: -0.045em;
-  margin: 26px auto 22px; max-width: 12ch; font-weight: 700;
-  text-shadow: 0 4px 60px rgba(7, 7, 12, 0.8);
-}
-.hero p.lead { font-size: clamp(17px, 2.2vw, 21px); color: #c9c7dc; max-width: 640px; margin: 0 auto 34px; text-shadow: 0 2px 20px rgba(7, 7, 12, 0.9); }
-.hero-ctas { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
-.sound-btn[aria-pressed="true"] { border-color: var(--pink); box-shadow: 0 0 0 4px rgba(236, 72, 153, 0.15); }
-.sound-note { margin-top: 14px; font-size: 13px; color: var(--faint); }
-.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 760px; margin: 56px auto 0; }
-.stat {
-  padding: 16px 12px; border-radius: 14px; background: rgba(17, 17, 27, 0.6); border: 1px solid var(--border);
-  backdrop-filter: blur(8px);
-}
-.stat b { display: block; font-size: clamp(22px, 3.4vw, 30px); letter-spacing: -0.03em; line-height: 1.1; }
-.stat span { font-size: 13px; color: var(--muted); }
-.scroll-cue { position: absolute; left: 50%; bottom: 22px; transform: translateX(-50%); color: var(--faint); font-size: 12px; letter-spacing: .2em; text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-.scroll-cue i { width: 1px; height: 34px; background: linear-gradient(var(--faint), transparent); animation: cue 2s infinite; transform-origin: top; }
-@keyframes cue { 0% { transform: scaleY(0); } 50% { transform: scaleY(1); } 100% { transform: scaleY(1); opacity: 0; } }
+.hero { padding: clamp(56px, 9vw, 110px) 0 clamp(56px, 8vw, 96px); border-bottom: 1px solid var(--line); }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(32px, 5vw, 64px); align-items: center; }
+.hero h1 { font-size: clamp(34px, 5vw, 54px); line-height: 1.08; letter-spacing: -0.025em; font-weight: 600; margin: 0 0 18px; }
+.hero h1 span { color: var(--accent); }
+.hero p { color: var(--muted); font-size: 18px; margin: 0 0 28px; max-width: 46ch; }
+.hero .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.specs { margin: 34px 0 0; padding: 0; list-style: none; font: 13px/1.9 var(--mono); color: var(--faint); }
+.specs li { display: flex; gap: 10px; }
+.specs b { color: var(--muted); font-weight: 500; min-width: 9.5ch; }
+
+.scope { border: 1px solid var(--line-2); border-radius: 8px; background: #0b0b0a; overflow: hidden; }
+.scope-head, .scope-foot { display: flex; justify-content: space-between; gap: 12px; padding: 9px 14px; font: 12px var(--mono); color: var(--faint); }
+.scope-head { border-bottom: 1px solid var(--line); }
+.scope-foot { border-top: 1px solid var(--line); }
+.scope-head .live { display: inline-flex; align-items: center; gap: 7px; color: var(--muted); }
+.scope-head .led { width: 7px; height: 7px; border-radius: 50%; background: var(--line-2); }
+.scope-head .live.on .led { background: var(--accent); }
+.scope-foot span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#scope { display: block; width: 100%; aspect-ratio: 16 / 10; cursor: crosshair; touch-action: pan-y; }
 
 /* ---------- sections ---------- */
-section { position: relative; padding: clamp(80px, 12vw, 140px) 0; }
-.kicker { font: 600 13px/1 var(--mono); letter-spacing: .16em; text-transform: uppercase; color: var(--pink); }
-.section-title { font-size: clamp(32px, 5vw, 56px); line-height: 1.04; letter-spacing: -0.035em; margin: 14px 0 16px; max-width: 18ch; }
-.section-lead { color: var(--muted); max-width: 620px; margin: 0 0 48px; font-size: 18px; }
-.reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2, .7, .2, 1), transform .8s cubic-bezier(.2, .7, .2, 1); }
-.reveal.in { opacity: 1; transform: none; }
+section { padding: clamp(64px, 9vw, 104px) 0; border-bottom: 1px solid var(--line); }
+.sec-head { display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 0 16px; margin-bottom: 36px; }
+.sec-head .no { font: 500 13px/2.2 var(--mono); color: var(--accent); }
+.sec-head h2 { margin: 0; font-size: clamp(26px, 3.4vw, 34px); line-height: 1.2; letter-spacing: -0.02em; font-weight: 600; }
+.sec-head p { grid-column: 2; margin: 10px 0 0; color: var(--muted); max-width: 62ch; }
+.fade { opacity: 0; transform: translateY(12px); transition: opacity .6s ease, transform .6s ease; }
+.fade.in { opacity: 1; transform: none; }
 
 /* ---------- demo ---------- */
-.demo { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 20px; align-items: stretch; }
-.cmd-panel { display: flex; flex-direction: column; gap: 10px; }
-.cmd-panel h3 { margin: 0 0 4px; font-size: 15px; color: var(--muted); font-weight: 500; }
+.demo { display: grid; grid-template-columns: 240px minmax(0, 1fr); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.cmds { border-right: 1px solid var(--line); background: var(--surface); display: flex; flex-direction: column; }
+.cmds .label { padding: 14px 16px 10px; font: 12px var(--mono); color: var(--faint); text-transform: uppercase; letter-spacing: .08em; }
 .cmd {
-  display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
-  padding: 13px 14px; border-radius: 14px; border: 1px solid var(--border);
-  background: var(--surface); color: var(--text); cursor: pointer; font: 500 15px var(--sans);
-  transition: border-color .2s, transform .2s, background .2s;
+  display: flex; align-items: center; gap: 12px; padding: 11px 16px; border: 0; border-top: 1px solid var(--line);
+  background: transparent; color: var(--text); text-align: left; cursor: pointer; font: 14px var(--sans);
 }
-.cmd:hover:not(:disabled) { border-color: var(--border-strong); transform: translateX(3px); background: var(--surface-2); }
-.cmd:disabled { opacity: .45; cursor: wait; }
-.cmd code { color: var(--cyan); font-size: 14px; }
+.cmd:hover:not(:disabled) { background: var(--surface-2); }
+.cmd:hover:not(:disabled) .icon { color: var(--accent); }
+.cmd:disabled { cursor: wait; color: var(--faint); }
+.cmd .icon { color: var(--muted); }
+.cmd code { font-size: 13.5px; }
 .cmd small { display: block; color: var(--faint); font-size: 12.5px; }
-.cmd .ico { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(255, 255, 255, 0.05); flex: none; }
-.demo-hint { font-size: 13px; color: var(--faint); margin-top: 6px; }
+.cmds .hint { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--line); font-size: 12.5px; color: var(--faint); }
 
-.chat {
-  display: flex; flex-direction: column; min-height: 560px; height: 560px; border-radius: var(--radius);
-  background: var(--bg-2); border: 1px solid var(--border); overflow: hidden;
-  box-shadow: 0 40px 120px -40px rgba(139, 92, 246, 0.35);
-}
-.chat-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.chat { display: flex; flex-direction: column; height: 540px; background: #121211; min-width: 0; }
+.chat-head { display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line); font-size: 14px; }
+.chat-head .icon { color: var(--faint); width: 16px; height: 16px; }
 .chat-head b { font-weight: 600; }
-.chat-head .hash { color: var(--faint); font-size: 20px; line-height: 1; }
-.chat-head .voice { margin-left: auto; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
-.eq { display: inline-flex; gap: 2px; align-items: flex-end; height: 14px; }
-.eq i { width: 3px; background: var(--green); border-radius: 2px; height: 4px; }
-.eq.on i { animation: eq 0.9s infinite ease-in-out; }
-.eq.on i:nth-child(2) { animation-delay: -.3s; } .eq.on i:nth-child(3) { animation-delay: -.6s; } .eq.on i:nth-child(4) { animation-delay: -.15s; }
-@keyframes eq { 0%, 100% { height: 4px; } 50% { height: 14px; } }
-.chat-log { flex: 1; overflow-y: auto; padding: 18px; display: flex; flex-direction: column; gap: 16px; scroll-behavior: smooth; }
-.chat-log::-webkit-scrollbar { width: 8px; } .chat-log::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 8px; }
-.msg { display: flex; gap: 12px; animation: msgIn .35s cubic-bezier(.2, .7, .2, 1); }
-@keyframes msgIn { from { opacity: 0; transform: translateY(8px); } }
-.avatar { width: 38px; height: 38px; border-radius: 50%; flex: none; display: grid; place-items: center; font-size: 17px; }
-.avatar.user { background: linear-gradient(135deg, #f59e0b, #ef4444); }
-.avatar.bot { background: var(--grad); }
-.msg-body { min-width: 0; flex: 1; }
-.msg-meta { display: flex; align-items: center; gap: 8px; font-size: 14px; margin-bottom: 3px; }
-.msg-meta b { font-weight: 600; }
-.tag { font: 600 10px/1 var(--sans); padding: 3px 5px; border-radius: 4px; background: var(--violet); color: #fff; letter-spacing: .04em; }
-.msg-meta time { color: var(--faint); font-size: 12px; }
-.slash { display: inline-flex; gap: 6px; align-items: center; font-family: var(--mono); font-size: 14px; }
-.slash .name { color: var(--cyan); background: rgba(34, 211, 238, 0.1); padding: 2px 7px; border-radius: 6px; }
-.slash .arg { color: var(--muted); }
-.embed {
-  border-left: 4px solid #5865f2; background: var(--surface); border-radius: 6px;
-  padding: 10px 14px; font-size: 15px; max-width: 520px; overflow-wrap: anywhere;
-}
-.embed.with-thumb { display: grid; grid-template-columns: minmax(0, 1fr) 64px; gap: 12px; }
-.embed .thumb { width: 64px; height: 64px; border-radius: 8px; background: var(--grad); display: grid; place-items: center; font-size: 26px; }
-.embed a { color: #5ea8ff; text-decoration: none; }
-.embed .dur { font-family: var(--mono); font-size: 13px; background: rgba(255, 255, 255, 0.07); padding: 1px 6px; border-radius: 5px; }
-.embed .bar { font-size: 13px; letter-spacing: -1px; white-space: nowrap; overflow: hidden; }
-.embed .foot { font-size: 12px; color: var(--faint); margin-top: 6px; }
-.embed .mention { color: #c9cdfb; background: rgba(88, 101, 242, 0.3); border-radius: 4px; padding: 0 3px; }
-.ephemeral { font-size: 14px; color: var(--muted); }
-.ephemeral small { display: block; font-size: 11.5px; color: var(--faint); margin-top: 2px; }
-.typing { display: flex; gap: 10px; align-items: center; font-size: 13px; color: var(--faint); padding-left: 50px; height: 0; overflow: hidden; transition: height .2s; }
+.chat-head .voice { margin-left: auto; display: inline-flex; align-items: center; gap: 7px; color: var(--faint); font-size: 13px; white-space: nowrap; }
+.chat-head .voice.on { color: var(--muted); }
+.chat-head .voice.on .icon { color: var(--accent); }
+.log { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 14px; }
+.msg { display: flex; gap: 12px; animation: in .25s ease; }
+@keyframes in { from { opacity: 0; transform: translateY(4px); } }
+.av { width: 34px; height: 34px; border-radius: 50%; flex: none; display: grid; place-items: center; }
+.av .icon { width: 17px; height: 17px; }
+.av.user { background: #2b2b27; color: var(--muted); }
+.av.bot { background: var(--accent); color: #140a05; }
+.body { min-width: 0; flex: 1; }
+.meta { display: flex; align-items: center; gap: 7px; font-size: 13.5px; margin-bottom: 2px; }
+.meta b { font-weight: 600; }
+.meta .tag { font: 600 10px/1 var(--sans); padding: 3px 4px; border-radius: 3px; background: var(--embed); color: #fff; }
+.meta time { color: var(--faint); font-size: 12px; }
+.slash { font-family: var(--mono); font-size: 13.5px; }
+.slash .n { color: var(--accent); }
+.slash .a { color: var(--muted); }
+.embed { border-left: 3px solid var(--embed); background: var(--surface); border-radius: 4px; padding: 9px 12px; font-size: 14.5px; max-width: 500px; overflow-wrap: anywhere; }
+.embed.thumb { display: grid; grid-template-columns: minmax(0, 1fr) 60px; gap: 12px; }
+.embed .art { width: 60px; height: 60px; border-radius: 4px; background: var(--surface-2); border: 1px solid var(--line); display: grid; place-items: center; color: var(--faint); }
+.embed .art .icon { width: 24px; height: 24px; }
+.embed a { color: var(--link); text-decoration: none; }
+.embed .dur { font: 12.5px var(--mono); background: rgba(255, 255, 255, 0.06); padding: 1px 5px; border-radius: 3px; }
+.embed .bar { font-size: 12.5px; letter-spacing: -1px; white-space: nowrap; overflow: hidden; display: inline-block; max-width: 100%; }
+.embed .foot { font-size: 12px; color: var(--faint); margin-top: 5px; }
+.embed .mention { color: #c9cdfb; background: rgba(88, 101, 242, 0.25); border-radius: 3px; padding: 0 3px; }
+.eph { font-size: 14px; color: var(--muted); }
+.eph small { display: flex; align-items: center; gap: 5px; font-size: 11.5px; color: var(--faint); margin-top: 2px; }
+.eph small .icon { width: 13px; height: 13px; }
+.typing { height: 0; overflow: hidden; padding-left: 62px; font-size: 12.5px; color: var(--faint); transition: height .15s; }
 .typing.on { height: 18px; }
-.typing .dots i { display: inline-block; width: 5px; height: 5px; margin-right: 3px; border-radius: 50%; background: var(--muted); animation: bounce 1s infinite; }
-.typing .dots i:nth-child(2) { animation-delay: .15s; } .typing .dots i:nth-child(3) { animation-delay: .3s; }
-@keyframes bounce { 50% { transform: translateY(-4px); opacity: .5; } }
-.chat-input { margin: 0 16px 16px; padding: 12px 14px; border-radius: 10px; background: var(--surface-2); color: var(--faint); font-family: var(--mono); font-size: 14px; min-height: 46px; display: flex; align-items: center; }
-.chat-input.active { color: var(--text); }
-.caret { display: inline-block; width: 2px; height: 18px; background: var(--cyan); margin-left: 2px; animation: blink 1s steps(1) infinite; }
+.input { margin: 0 16px 16px; padding: 11px 13px; border-radius: 6px; background: var(--surface-2); color: var(--faint); font: 13.5px var(--mono); min-height: 42px; display: flex; align-items: center; }
+.input.active { color: var(--text); }
+.caret { display: inline-block; width: 7px; height: 15px; background: var(--accent); margin-left: 1px; animation: blink 1s steps(1) infinite; }
 @keyframes blink { 50% { opacity: 0; } }
 
 /* ---------- pipeline ---------- */
-.pipe { display: flex; align-items: stretch; gap: 0; }
-.node {
-  flex: 1 1 0; min-width: 0; position: relative; padding: 18px 14px; border-radius: 16px; text-align: center;
-  background: var(--surface); border: 1px solid var(--border); cursor: pointer; color: var(--text); font: inherit;
-  transition: border-color .3s, transform .3s, box-shadow .3s, background .3s;
+.stages { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.stage {
+  position: relative; display: flex; flex-direction: column; gap: 4px; padding: 18px 16px 16px; text-align: left;
+  border: 0; border-right: 1px solid var(--line); background: var(--surface); color: var(--text); cursor: pointer; font: inherit;
 }
-.node:hover { border-color: var(--border-strong); }
-.node.active { border-color: transparent; background: linear-gradient(var(--surface-2), var(--surface-2)) padding-box, var(--grad) border-box; border: 1px solid transparent; transform: translateY(-4px); box-shadow: 0 18px 50px -18px rgba(236, 72, 153, 0.55); }
-.node .n-ico { font-size: 28px; display: block; margin-bottom: 6px; }
-.node b { display: block; font-size: 15px; }
-.node span { display: block; font-size: 12.5px; color: var(--muted); line-height: 1.35; margin-top: 2px; }
-.node .step { position: absolute; top: 8px; left: 10px; font: 600 11px var(--mono); color: var(--faint); }
-.link { flex: 0 0 34px; position: relative; align-self: center; height: 2px; background: linear-gradient(90deg, rgba(139, 92, 246, 0.25), rgba(34, 211, 238, 0.25)); }
-.link::before, .link::after {
-  content: ''; position: absolute; top: 50%; width: 8px; height: 8px; margin-top: -4px; border-radius: 50%;
-  background: var(--cyan); box-shadow: 0 0 12px var(--cyan); animation: flowX 1.6s linear infinite;
-}
-.link::after { animation-delay: -.8s; background: var(--pink); box-shadow: 0 0 12px var(--pink); }
-@keyframes flowX { from { left: -4px; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } to { left: calc(100% - 4px); opacity: 0; } }
-@keyframes flowY { from { top: -4px; opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } to { top: calc(100% - 4px); opacity: 0; } }
-.detail {
-  margin-top: 26px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 24px; align-items: center;
-  padding: 26px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border);
-  min-height: 190px;
-}
-.detail h3 { margin: 0 0 8px; font-size: 24px; letter-spacing: -0.02em; }
+.stage:last-child { border-right: 0; }
+.stage::before { content: ''; position: absolute; left: 0; right: 0; top: 0; height: 2px; background: transparent; }
+.stage.active { background: var(--surface-2); }
+.stage.active::before { background: var(--accent); }
+.stage .icon { width: 22px; height: 22px; color: var(--muted); margin-bottom: 10px; }
+.stage.active .icon { color: var(--accent); }
+.stage .k { font: 12px var(--mono); color: var(--faint); }
+.stage b { font-weight: 600; font-size: 15px; }
+.stage span:not(.k) { font-size: 13px; color: var(--muted); line-height: 1.35; }
+.stage .arrow { position: absolute; right: -7px; top: 26px; z-index: 1; width: 13px; height: 13px; color: var(--line-2); background: var(--bg); }
+.detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; margin-top: 20px; padding: 24px 0 0; min-height: 150px; }
+.detail h3 { margin: 0 0 8px; font-size: 19px; font-weight: 600; }
 .detail p { margin: 0; color: var(--muted); }
-.detail pre { margin: 0; padding: 16px; border-radius: 12px; background: var(--bg); border: 1px solid var(--border); font-size: 13.5px; color: var(--cyan); white-space: pre-wrap; overflow-wrap: anywhere; }
-.detail .fade { animation: fade .45s ease; }
-@keyframes fade { from { opacity: 0; transform: translateY(6px); } }
+.detail pre { margin: 0; padding: 14px 16px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; color: var(--text); white-space: pre-wrap; overflow-wrap: anywhere; }
+.swap { animation: in .3s ease; }
 
-.bug {
-  margin-top: 26px; padding: 26px; border-radius: var(--radius); position: relative; overflow: hidden;
-  background: radial-gradient(ellipse at top right, rgba(248, 113, 113, 0.14), transparent 60%), var(--surface);
-  border: 1px solid rgba(248, 113, 113, 0.25);
-  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 24px; align-items: center;
-}
-.bug h3 { margin: 0 0 8px; font-size: 22px; letter-spacing: -0.02em; }
-.bug p { margin: 0; color: var(--muted); font-size: 16px; }
-.decode { font-family: var(--mono); font-size: 14px; display: grid; gap: 6px; }
-.decode div { display: flex; gap: 10px; align-items: baseline; padding: 8px 12px; border-radius: 9px; background: rgba(7, 7, 12, 0.6); border: 1px solid var(--border); overflow-wrap: anywhere; }
-.decode div > span:first-child { color: var(--faint); flex: none; width: 1.2em; }
-.decode div:last-child { border-color: rgba(52, 211, 153, 0.4); color: var(--green); }
-.decode .err { color: var(--red); }
+.note { margin-top: 48px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; padding-top: 32px; border-top: 1px dashed var(--line-2); }
+.note h3 { margin: 0 0 8px; font-size: 19px; font-weight: 600; }
+.note p { margin: 0; color: var(--muted); }
+.trace { margin: 0; padding: 0; list-style: none; font: 13px/1.5 var(--mono); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+.trace li { display: flex; gap: 12px; padding: 9px 14px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
+.trace li:first-child { border-top: 0; color: var(--err); }
+.trace li:last-child { color: var(--ok); background: rgba(123, 197, 139, 0.06); }
+.trace li span { color: var(--faint); flex: none; }
 
 /* ---------- features ---------- */
-.bento { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 16px; }
-.card {
-  --mx: 50%; --my: 50%;
-  position: relative; padding: 26px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--border);
-  overflow: hidden; grid-column: span 2; transition: border-color .3s, transform .3s;
-}
-.card::before {
-  content: ''; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s;
-  background: radial-gradient(420px circle at var(--mx) var(--my), rgba(139, 92, 246, 0.16), transparent 45%);
-}
-.card:hover { border-color: var(--border-strong); transform: translateY(-3px); }
-.card:hover::before { opacity: 1; }
-.card.wide { grid-column: span 3; }
-.card .c-ico { font-size: 28px; margin-bottom: 14px; display: block; }
-.card h3 { margin: 0 0 6px; font-size: 19px; letter-spacing: -0.01em; }
-.card p { margin: 0; color: var(--muted); font-size: 15.5px; }
-.card .big { font-size: 44px; font-weight: 700; letter-spacing: -0.04em; line-height: 1; margin: 6px 0 8px; }
-.card code { font-size: 13.5px; color: var(--cyan); }
+.feats { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); border-top: 1px solid var(--line); }
+.feat { display: grid; grid-template-columns: 36px minmax(0, 1fr); gap: 2px 14px; padding: 22px 24px 22px 0; border-bottom: 1px solid var(--line); }
+.feat:nth-child(odd) { border-right: 1px solid var(--line); }
+.feat:nth-child(even) { padding-left: 24px; }
+.feat .icon { grid-row: span 2; width: 22px; height: 22px; color: var(--accent); margin-top: 2px; }
+.feat h3 { margin: 0; font-size: 16px; font-weight: 600; }
+.feat p { margin: 0; color: var(--muted); font-size: 15px; }
+.stack { display: flex; flex-wrap: wrap; gap: 8px 22px; margin-top: 28px; font: 13px var(--mono); color: var(--faint); }
+.stack b { color: var(--muted); font-weight: 500; }
 
-.stack { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
-.chip { padding: 9px 14px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font: 500 14px var(--mono); color: var(--muted); }
-.chip b { color: var(--text); font-weight: 600; }
-
-/* ---------- start ---------- */
-.start { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
-.steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; counter-reset: step; min-width: 0; }
-.stepc { min-width: 0; padding: 20px 22px; border-radius: 16px; background: var(--surface); border: 1px solid var(--border); }
-.stepc h3 { margin: 0 0 4px; font-size: 18px; display: flex; gap: 12px; align-items: center; }
-.stepc h3::before {
-  counter-increment: step; content: counter(step); width: 26px; height: 26px; border-radius: 8px; flex: none;
-  background: var(--grad); display: grid; place-items: center; font-size: 14px; color: #fff;
-}
-.stepc p { margin: 0 0 12px; color: var(--muted); font-size: 15px; }
+/* ---------- install ---------- */
+.install { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; align-items: start; }
+.steps { display: grid; grid-template-columns: minmax(0, 1fr); gap: 26px; counter-reset: s; min-width: 0; }
+.step { min-width: 0; }
+.step h3 { display: flex; gap: 12px; align-items: baseline; margin: 0 0 6px; font-size: 16px; font-weight: 600; }
+.step h3::before { counter-increment: s; content: counter(s, decimal-leading-zero); font: 500 13px var(--mono); color: var(--accent); }
+.step p { margin: 0 0 10px; color: var(--muted); font-size: 15px; }
 .code { position: relative; }
-.code pre { margin: 0; padding: 14px 52px 14px 14px; border-radius: 11px; background: var(--bg); border: 1px solid var(--border); font-size: 13.5px; overflow-x: auto; color: #d7d5ea; }
-.code pre .c { color: var(--faint); }
+.code pre { margin: 0; padding: 13px 48px 13px 14px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line); font-size: 13px; overflow-x: auto; }
 .copy {
-  position: absolute; top: 8px; right: 8px; padding: 6px 9px; border-radius: 8px; border: 1px solid var(--border-strong);
-  background: var(--surface-2); color: var(--muted); font: 500 12px var(--sans); cursor: pointer;
+  position: absolute; top: 7px; right: 7px; width: 32px; height: 32px; display: grid; place-items: center;
+  border-radius: 5px; border: 1px solid var(--line-2); background: var(--surface-2); color: var(--muted); cursor: pointer;
 }
 .copy:hover { color: var(--text); }
-.copy.ok { color: var(--green); border-color: rgba(52, 211, 153, 0.5); }
-.terminal { position: sticky; top: 90px; border-radius: var(--radius); background: #05050a; border: 1px solid var(--border); overflow: hidden; box-shadow: 0 40px 120px -50px rgba(34, 211, 238, 0.35); }
-.term-head { display: flex; align-items: center; gap: 7px; padding: 12px 14px; background: var(--surface); border-bottom: 1px solid var(--border); }
-.term-head i { width: 11px; height: 11px; border-radius: 50%; background: #3a3a4d; }
-.term-head span { margin-left: 8px; font: 13px var(--mono); color: var(--faint); }
-.term-body { padding: 18px; font: 13.5px/1.75 var(--mono); min-height: 300px; color: #cfcde3; white-space: pre-wrap; overflow-wrap: anywhere; }
-.term-body .p { color: var(--green); }
+.copy.ok { color: var(--ok); }
+.copy .icon { width: 15px; height: 15px; }
+.term { position: sticky; top: 80px; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #0b0b0a; }
+.term-head { display: flex; align-items: center; justify-content: space-between; padding: 9px 14px; border-bottom: 1px solid var(--line); font: 12px var(--mono); color: var(--faint); }
+.term-head button { display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; color: var(--faint); font: 12px var(--mono); cursor: pointer; padding: 2px 0; }
+.term-head button:hover { color: var(--text); }
+.term-head button .icon { width: 13px; height: 13px; }
+.term-body { padding: 16px; font: 13px/1.75 var(--mono); min-height: 260px; white-space: pre-wrap; overflow-wrap: anywhere; color: var(--text); }
+.term-body .p { color: var(--accent); }
 .term-body .d { color: var(--faint); }
-.term-body .ok { color: var(--text); }
-.term-replay { margin: 0 18px 18px; }
 
-/* ---------- footer ---------- */
-footer { padding: 60px 0 50px; border-top: 1px solid var(--border); color: var(--muted); font-size: 15px; }
-footer .wrap { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: end; }
-footer .tos { max-width: 620px; font-size: 14px; color: var(--faint); margin: 10px 0 0; }
+footer { padding: 40px 0 56px; color: var(--faint); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px 32px; }
+footer p { margin: 0; max-width: 64ch; }
 
 /* ---------- responsive ---------- */
 @media (max-width: 960px) {
-  .demo { grid-template-columns: minmax(0, 1fr); }
-  .cmd-panel { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
-  .cmd-panel h3, .demo-hint { grid-column: 1 / -1; }
-  .cmd { flex-direction: column; text-align: center; gap: 6px; padding: 12px 8px; }
-  .cmd small { display: none; }
-  .bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .card, .card.wide { grid-column: span 1; }
-  .start { grid-template-columns: minmax(0, 1fr); }
-  .terminal { position: relative; top: 0; }
-  .detail, .bug { grid-template-columns: minmax(0, 1fr); }
+  .hero .wrap, .install, .detail, .note { grid-template-columns: minmax(0, 1fr); }
+  .stages { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .stage:nth-child(3n) { border-right: 0; }
+  .stage:nth-child(n+4) { border-top: 1px solid var(--line); }
+  .stage:nth-child(3n) .arrow { display: none; }
+  .term { position: relative; top: 0; }
 }
 @media (max-width: 760px) {
-  .nav-links { display: none; }
-  .nav .btn { margin-left: auto; }
-  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .pipe { flex-direction: column; }
-  .node { display: grid; grid-template-columns: 44px minmax(0, 1fr); text-align: left; align-items: center; column-gap: 12px; padding: 14px 16px; }
-  .node .n-ico { grid-row: span 2; margin: 0; font-size: 26px; text-align: center; }
-  .node .step { top: 50%; left: auto; right: 14px; transform: translateY(-50%); }
-  .node.active { transform: translateX(4px); }
-  .link { flex: 0 0 22px; width: 2px; height: auto; align-self: stretch; margin-left: 37px; background: linear-gradient(rgba(139, 92, 246, 0.25), rgba(34, 211, 238, 0.25)); }
-  .link::before, .link::after { left: 50% !important; margin-left: -4px; margin-top: 0; top: 0; animation-name: flowY; }
-  .chat { height: 520px; min-height: 520px; }
-  .bento { grid-template-columns: minmax(0, 1fr); }
-  footer .wrap { grid-template-columns: minmax(0, 1fr); }
-}
-@media (max-width: 420px) {
-  .cmd-panel { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .chat-log { padding: 14px; }
-  .avatar { width: 32px; height: 32px; font-size: 15px; }
-  .typing { padding-left: 44px; }
+  .top nav { display: none; }
+  .gh { margin-left: auto; }
+  .sec-head { grid-template-columns: minmax(0, 1fr); }
+  .sec-head p { grid-column: 1; }
+  .demo { grid-template-columns: minmax(0, 1fr); }
+  .cmds { border-right: 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .cmds .label, .cmds .hint { grid-column: 1 / -1; }
+  .cmds .hint { display: none; }
+  .cmd { flex-direction: column; gap: 6px; text-align: center; padding: 12px 6px; border-right: 1px solid var(--line); }
+  .cmd:nth-of-type(3n) { border-right: 0; }
+  .cmd small { display: none; }
+  .chat { height: 500px; }
+  .stages { grid-template-columns: minmax(0, 1fr); }
+  .stage { flex-direction: row; flex-wrap: wrap; align-items: center; gap: 2px 12px; border-right: 0; border-top: 1px solid var(--line); padding: 14px 16px; }
+  .stage:first-child { border-top: 0; }
+  .stage .icon { margin: 0; }
+  .stage .k { order: 3; margin-left: auto; }
+  .stage span:not(.k) { flex-basis: 100%; padding-left: 34px; }
+  .stage .arrow { display: none; }
+  .stage::before { right: auto; bottom: 0; width: 2px; height: auto; }
+  .feats { grid-template-columns: minmax(0, 1fr); }
+  .feat, .feat:nth-child(even) { padding: 20px 0; border-right: 0; }
 }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
-  .reveal { opacity: 1; transform: none; }
+  .fade { opacity: 1; transform: none; }
 }
 </style>
 </head>
 <body>
 
-<nav class="nav" id="nav">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11M4.5 6h.01M4.5 12h.01M4.5 18h.01"/></symbol>
+    <symbol id="i-wave" viewBox="0 0 24 24"><path d="M2 12h3.5l2.5-7 4 14 3-10 2 3h5"/></symbol>
+    <symbol id="i-repeat" viewBox="0 0 24 24"><path d="M17 2l3 3-3 3"/><path d="M4 11V9a4 4 0 0 1 4-4h12"/><path d="M7 22l-3-3 3-3"/><path d="M20 13v2a4 4 0 0 1-4 4H4"/></symbol>
+    <symbol id="i-skip" viewBox="0 0 24 24"><path d="M5 4.5v15l10-7.5z"/><path d="M19 5v14"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="5.5" y="5.5" width="13" height="13" rx="1.5"/></symbol>
+    <symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-bot" viewBox="0 0 24 24"><rect x="4" y="8" width="16" height="12" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.5" r="1"/><path d="M9 14h.01M15 14h.01"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></symbol>
+    <symbol id="i-plug" viewBox="0 0 24 24"><path d="M9 2.5v5M15 2.5v5"/><path d="M6 7.5h12v3a6 6 0 0 1-12 0z"/><path d="M12 16.5v5"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M7.5 4v16M16.5 4v16M3 9h4.5M3 15h4.5M16.5 9H21M16.5 15H21"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19.2 5.8a9 9 0 0 1 0 12.4"/></symbol>
+    <symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2.5L4.5 14H11l-1 7.5L18.5 10H12z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7.5a4 4 0 0 1 8 0V11"/></symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3c2.5 2.6 3.8 5.6 3.8 9s-1.3 6.4-3.8 9c-2.5-2.6-3.8-5.6-3.8-9S9.5 5.6 12 3z"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8 8 0 0 0-14.6-4.4L4 8.5"/><path d="M4 3.5v5h5"/><path d="M4 13a8 8 0 0 0 14.6 4.4L20 15.5"/><path d="M20 20.5v-5h-5"/></symbol>
+    <symbol id="i-key" viewBox="0 0 24 24"><circle cx="8" cy="15.5" r="4.5"/><path d="M11.2 12.3L20 3.5"/><path d="M16.5 7l3 3"/></symbol>
+    <symbol id="i-logout" viewBox="0 0 24 24"><path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l5-5-5-5"/><path d="M15 12H4"/></symbol>
+    <symbol id="i-server" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="7" rx="1.5"/><rect x="3" y="13" width="18" height="7" rx="1.5"/><path d="M7 7.5h.01M7 16.5h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5M12 17.5h.01"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="12" height="12" rx="2"/><path d="M15.5 8.5V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v7.5a2 2 0 0 0 2 2h2.5"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-hash" viewBox="0 0 24 24"><path d="M5 9h14M5 15h14M10.5 4L8.5 20M15.5 4l-2 16"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+    <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.5-6"/><path d="M3.5 3.5V8H8"/></symbol>
+    <symbol id="i-github" viewBox="0 0 24 24"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></symbol>
+  </defs>
+</svg>
+
+<header class="top">
   <div class="wrap">
-    <a class="logo" href="#top"><span class="logo-mark">🎧</span> music-dc</a>
-    <div class="nav-links">
+    <a class="brand" href="#"><svg class="icon"><use href="#i-music"/></svg>music-dc</a>
+    <nav aria-label="Navigasi">
       <a href="#demo">Demo</a>
       <a href="#cara-kerja">Cara kerja</a>
       <a href="#fitur">Fitur</a>
-      <a href="#mulai">Mulai</a>
-    </div>
-    <a class="btn" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener">
-      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.33-1.28-1.69-1.28-1.69-1.05-.72.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.69 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/></svg>
-      GitHub
-    </a>
+      <a href="#instalasi">Instalasi</a>
+    </nav>
+    <a class="gh" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener"><svg class="icon fill"><use href="#i-github"/></svg>GitHub</a>
   </div>
-</nav>
-
-<header class="hero" id="top">
-  <canvas id="viz" aria-hidden="true"></canvas>
-  <div class="wrap hero-inner">
-    <span class="eyebrow"><span class="dot"></span> Bot musik Discord · self-hosted · open source</span>
-    <h1>Musik buat server lo. <span class="grad-text">Tanpa Lavalink.</span></h1>
-    <p class="lead">Cukup satu proses Node, yt-dlp, dan FFmpeg. Ketik <code>/play</code>, dan lagunya langsung ngalir ke voice channel. Nggak perlu server Java, nggak perlu Docker.</p>
-    <div class="hero-ctas">
-      <a class="btn btn-primary" href="#demo">▶ Coba demonya</a>
-      <button class="btn sound-btn" id="soundBtn" type="button" aria-pressed="false">🔊 Nyalain vibe-nya</button>
-    </div>
-    <div class="sound-note" id="soundNote">Musik lo-fi generatif, dibikin langsung di browser lo pakai Web Audio.</div>
-    <div class="stats">
-      <div class="stat"><b class="grad-text">1</b><span>proses Node</span></div>
-      <div class="stat"><b class="grad-text">10</b><span>slash command</span></div>
-      <div class="stat"><b class="grad-text">±4 dtk</b><span>playlist 182 lagu</span></div>
-      <div class="stat"><b class="grad-text">0</b><span>server audio terpisah</span></div>
-    </div>
-  </div>
-  <div class="scroll-cue" aria-hidden="true">scroll<i></i></div>
 </header>
 
 <main>
-  <!-- DEMO -->
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <h1>Bot musik Discord yang jalan di <span>satu proses Node</span>.</h1>
+        <p>music-dc muter lagu dari YouTube dan ratusan situs lain pakai yt-dlp dan FFmpeg. Nggak pakai Lavalink, Java, atau Docker. Cocok buat server tongkrongan yang di-host sendiri.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#instalasi">Pasang sendiri</a>
+          <a class="btn" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener"><svg class="icon fill"><use href="#i-github"/></svg>Source code</a>
+        </div>
+        <ul class="specs">
+          <li><b>runtime</b>Node.js ≥ 22.12</li>
+          <li><b>library</b>discord.js 14 · DisTube 5 · @discordjs/voice 0.19</li>
+          <li><b>audio</b>yt-dlp → FFmpeg → Opus (DAVE)</li>
+        </ul>
+      </div>
+      <figure class="scope" style="margin:0">
+        <div class="scope-head">
+          <span class="live" id="scopeLive"><span class="led"></span><span id="scopeState">IDLE</span></span>
+          <span>OUT · 48 kHz · s16le</span>
+        </div>
+        <canvas id="scope" aria-label="Osiloskop dekoratif yang bereaksi ke kursor dan ke demo di bawah"></canvas>
+        <figcaption class="scope-foot"><span id="scopeRead">gerakin kursor di layar</span><span id="scopeTrack">—</span></figcaption>
+      </figure>
+    </div>
+  </div>
+
   <section id="demo">
     <div class="wrap">
-      <div class="reveal">
-        <div class="kicker">01 · Demo</div>
-        <h2 class="section-title">Klik command-nya, lihat bot-nya bales.</h2>
-        <p class="section-lead">Ini simulasi. Gaya balasannya, progress bar <code>▬🔘▬</code>, dan aturan antriannya disalin dari kode bot yang asli. Lagu-lagunya fiktif.</p>
+      <div class="sec-head fade">
+        <span class="no">01</span>
+        <h2>Demo</h2>
+        <p>Simulasi di browser. Format balasan, progress bar, dan aturan antriannya ngikutin kode bot yang asli. Judul lagunya fiktif.</p>
       </div>
-      <div class="demo reveal">
-        <div class="cmd-panel" id="cmdPanel">
-          <h3>Slash command</h3>
-          <button class="cmd" data-cmd="play"><span class="ico">▶️</span><span><code>/play</code><small>tambah lagu ke antrian</small></span></button>
-          <button class="cmd" data-cmd="queue"><span class="ico">📃</span><span><code>/queue</code><small>lihat antrian</small></span></button>
-          <button class="cmd" data-cmd="nowplaying"><span class="ico">🎶</span><span><code>/nowplaying</code><small>progress bar live</small></span></button>
-          <button class="cmd" data-cmd="loop"><span class="ico">🔁</span><span><code>/loop</code><small>off → lagu → queue</small></span></button>
-          <button class="cmd" data-cmd="skip"><span class="ico">⏭️</span><span><code>/skip</code><small>lagu berikutnya</small></span></button>
-          <button class="cmd" data-cmd="stop"><span class="ico">⏹️</span><span><code>/stop</code><small>stop &amp; keluar</small></span></button>
-          <p class="demo-hint">Tip: <code>/play</code> beberapa kali, terus coba <code>/queue</code>.</p>
+      <div class="demo fade">
+        <div class="cmds">
+          <div class="label">Slash command</div>
+          <button class="cmd" data-cmd="play"><svg class="icon"><use href="#i-play"/></svg><span><code>/play</code><small>tambah lagu</small></span></button>
+          <button class="cmd" data-cmd="queue"><svg class="icon"><use href="#i-list"/></svg><span><code>/queue</code><small>lihat antrian</small></span></button>
+          <button class="cmd" data-cmd="nowplaying"><svg class="icon"><use href="#i-wave"/></svg><span><code>/nowplaying</code><small>progress lagu</small></span></button>
+          <button class="cmd" data-cmd="loop"><svg class="icon"><use href="#i-repeat"/></svg><span><code>/loop</code><small>off → lagu → queue</small></span></button>
+          <button class="cmd" data-cmd="skip"><svg class="icon"><use href="#i-skip"/></svg><span><code>/skip</code><small>lagu berikutnya</small></span></button>
+          <button class="cmd" data-cmd="stop"><svg class="icon"><use href="#i-stop"/></svg><span><code>/stop</code><small>stop dan keluar</small></span></button>
+          <div class="hint">Coba <code>/play</code> dua-tiga kali, lalu <code>/queue</code>.</div>
         </div>
         <div class="chat" aria-live="polite">
           <div class="chat-head">
-            <span class="hash">#</span><b>musik-tongkrongan</b>
-            <span class="voice" id="voiceState"><span class="eq" id="eq"><i></i><i></i><i></i><i></i></span><span id="voiceText">bot belum join voice</span></span>
+            <svg class="icon"><use href="#i-hash"/></svg><b>musik</b>
+            <span class="voice" id="voice"><svg class="icon"><use href="#i-volume"/></svg><span id="voiceText">belum di voice</span></span>
           </div>
-          <div class="chat-log" id="chatLog"></div>
-          <div class="typing" id="typing"><span class="dots"><i></i><i></i><i></i></span> music-dc lagi mikir…</div>
-          <div class="chat-input" id="chatInput">Kirim pesan ke #musik-tongkrongan</div>
+          <div class="log" id="log"></div>
+          <div class="typing" id="typing">music-dc sedang mengetik…</div>
+          <div class="input" id="input">Kirim pesan ke #musik</div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
   <section id="cara-kerja">
     <div class="wrap">
-      <div class="reveal">
-        <div class="kicker">02 · Cara kerja</div>
-        <h2 class="section-title">Dari <code>/play</code> ke speaker lo, dalam 6 langkah.</h2>
-        <p class="section-lead">Klik tiap tahap buat lihat apa yang terjadi di dalamnya. Titik-titik yang ngalir itu byte audio lo.</p>
+      <div class="sec-head fade">
+        <span class="no">02</span>
+        <h2>Cara kerja</h2>
+        <p>Jalan yang dilewati satu lagu dari <code>/play</code> sampai voice channel. Klik tiap tahap buat lihat detailnya.</p>
       </div>
-      <div class="pipe reveal" id="pipe" role="tablist" aria-label="Tahapan audio"></div>
-      <div class="detail reveal" id="detail" aria-live="polite"></div>
+      <div class="stages fade" id="stages" role="tablist" aria-label="Tahapan audio"></div>
+      <div class="detail" id="detail" aria-live="polite"></div>
 
-      <div class="bug reveal">
+      <div class="note fade">
         <div>
-          <div class="kicker" style="color: var(--red)">Cerita bug</div>
-          <h3>Kenapa audionya di-pipe lewat 127.0.0.1?</h3>
-          <p>Awalnya FFmpeg buka URL audio YouTube langsung, dan sesekali gagal dengan kode error yang aneh banget. Setelah dibongkar, ternyata itu cuma HTTP 403 yang dibungkus jadi angka. Sekarang yt-dlp yang download sendiri, dan FFmpeg cuma baca dari pipa lokal, jadi masalah ini hilang.</p>
+          <h3>Kenapa audionya lewat 127.0.0.1?</h3>
+          <p>Versi awal nyuruh FFmpeg buka URL audio YouTube langsung. Sesekali lagu gagal dengan exit code yang nggak masuk akal. Ternyata itu kode error FFmpeg untuk HTTP 403. Sekarang yt-dlp yang download audionya, dan FFmpeg cuma baca dari server lokal.</p>
         </div>
-        <div class="decode" aria-label="Penjelasan kode error">
-          <div><span>✗</span><span class="err">ffmpeg exited with code 3436169992</span></div>
-          <div><span>→</span>sebagai int32: −858797304</div>
-          <div><span>→</span>hex: −0x333034F8</div>
-          <div><span>→</span>FFERRTAG(0xF8, '4', '0', '3')</div>
-          <div><span>✓</span>AVERROR_HTTP_FORBIDDEN · HTTP 403</div>
-        </div>
+        <ol class="trace" aria-label="Penelusuran kode error">
+          <li><span>$</span>ffmpeg exited with code 3436169992</li>
+          <li><span>1</span>int32 → −858797304</li>
+          <li><span>2</span>hex → −0x333034F8</li>
+          <li><span>3</span>FFERRTAG(0xF8, '4', '0', '3')</li>
+          <li><span>=</span>AVERROR_HTTP_FORBIDDEN (403)</li>
+        </ol>
       </div>
     </div>
   </section>
 
-  <!-- FEATURES -->
   <section id="fitur">
     <div class="wrap">
-      <div class="reveal">
-        <div class="kicker">03 · Fitur</div>
-        <h2 class="section-title">Kecil, tapi nggak setengah-setengah.</h2>
-        <p class="section-lead">Semua yang lo harapin dari bot musik buat server tongkrongan, tanpa ribet ngurusin infrastruktur.</p>
+      <div class="sec-head fade">
+        <span class="no">03</span>
+        <h2>Fitur</h2>
       </div>
-      <div class="bento" id="bento">
-        <article class="card wide reveal">
-          <span class="c-ico">⚡</span>
-          <div class="big grad-text">182 lagu · ±4 dtk</div>
-          <h3>Playlist besar tetap cepat</h3>
-          <p>Daftar lagu dibaca sekaligus pakai <code>--flat-playlist</code>. Detail tiap lagu baru diambil pas lagunya mau diputar.</p>
-        </article>
-        <article class="card wide reveal">
-          <span class="c-ico">🔐</span>
-          <div class="big grad-text">DAVE</div>
-          <h3>Voice terenkripsi end-to-end</h3>
-          <p><code>@discordjs/voice</code> 0.19 sudah support protokol E2EE yang wajib di voice Discord sejak Maret 2026.</p>
-        </article>
-        <article class="card reveal">
-          <span class="c-ico">🎵</span>
-          <h3>Putar dari mana aja</h3>
-          <p>Judul, link video, playlist YouTube, SoundCloud, Bandcamp, dan ratusan situs lain yang didukung yt-dlp.</p>
-        </article>
-        <article class="card reveal">
-          <span class="c-ico">🔄</span>
-          <h3>yt-dlp auto-update</h3>
-          <p>Didownload otomatis dan di-update tiap bot start. Kalau YouTube berubah, cukup restart.</p>
-        </article>
-        <article class="card reveal">
-          <span class="c-ico">🍪</span>
-          <h3>Cookies opsional</h3>
-          <p>Buat video yang minta login atau "confirm you're not a bot". Pakai akun cadangan.</p>
-        </article>
-        <article class="card reveal">
-          <span class="c-ico">👋</span>
-          <h3>Tahu kapan harus cabut</h3>
-          <p>Keluar 2 menit setelah queue habis, atau 1 menit setelah voice channel kosong.</p>
-        </article>
-        <article class="card reveal">
-          <span class="c-ico">🏠</span>
-          <h3>Multi-server</h3>
-          <p>Queue, volume, loop, dan timer terpisah per server. Server A dan B bisa muter bareng.</p>
-        </article>
-        <article class="card reveal">
-          <span class="c-ico">🛟</span>
-          <h3>Gagal? Lanjut aja</h3>
-          <p>Lagu yang gagal diputar dilaporin dengan pesan aslinya, lalu bot lanjut ke lagu berikutnya tanpa crash.</p>
-        </article>
+      <div class="feats fade">
+        <div class="feat"><svg class="icon"><use href="#i-globe"/></svg><h3>Judul, link, dan playlist</h3><p>YouTube, SoundCloud, Bandcamp, dan situs lain yang didukung yt-dlp.</p></div>
+        <div class="feat"><svg class="icon"><use href="#i-zap"/></svg><h3>Playlist besar tetap cepat</h3><p>Dibaca pakai <code>--flat-playlist</code>. Playlist 182 lagu masuk antrian dalam ±4 detik.</p></div>
+        <div class="feat"><svg class="icon"><use href="#i-lock"/></svg><h3>Voice terenkripsi (DAVE)</h3><p><code>@discordjs/voice</code> 0.19 sudah support E2EE yang wajib di Discord sejak Maret 2026.</p></div>
+        <div class="feat"><svg class="icon"><use href="#i-refresh"/></svg><h3>yt-dlp update sendiri</h3><p>Didownload ke <code>bin/</code> dan di-update tiap bot start.</p></div>
+        <div class="feat"><svg class="icon"><use href="#i-key"/></svg><h3>Cookies opsional</h3><p>Buat video yang minta login. Disarankan pakai akun Google cadangan.</p></div>
+        <div class="feat"><svg class="icon"><use href="#i-logout"/></svg><h3>Auto-leave</h3><p>Keluar 2 menit setelah antrian habis, atau 1 menit setelah voice channel kosong.</p></div>
+        <div class="feat"><svg class="icon"><use href="#i-server"/></svg><h3>Banyak server sekaligus</h3><p>Antrian, volume, dan mode loop terpisah per server.</p></div>
+        <div class="feat"><svg class="icon"><use href="#i-alert"/></svg><h3>Gagal nggak bikin crash</h3><p>Lagu yang gagal dilaporin dengan pesan aslinya, lalu bot lanjut ke lagu berikutnya.</p></div>
       </div>
-      <div class="stack reveal" aria-label="Tech stack">
-        <span class="chip"><b>discord.js</b> 14</span>
-        <span class="chip"><b>DisTube</b> 5</span>
-        <span class="chip"><b>@discordjs/voice</b> 0.19</span>
-        <span class="chip"><b>@discordjs/opus</b> 0.11</span>
-        <span class="chip"><b>yt-dlp</b> latest</span>
-        <span class="chip"><b>FFmpeg</b> 9</span>
-        <span class="chip"><b>Node</b> ≥ 22.12</span>
+      <div class="stack fade">
+        <span><b>discord.js</b> 14</span><span><b>DisTube</b> 5</span><span><b>@discordjs/voice</b> 0.19</span><span><b>@discordjs/opus</b> 0.11</span><span><b>yt-dlp</b></span><span><b>FFmpeg</b></span><span><b>Node</b> ≥ 22.12</span>
       </div>
     </div>
   </section>
 
-  <!-- START -->
-  <section id="mulai">
+  <section id="instalasi">
     <div class="wrap">
-      <div class="reveal">
-        <div class="kicker">04 · Mulai</div>
-        <h2 class="section-title">Jalan di PC Windows lo dalam beberapa menit.</h2>
-        <p class="section-lead">yt-dlp nggak perlu di-install manual, karena bot download sendiri pas pertama kali start. Panduan lengkapnya (cookies, troubleshooting) ada di README.</p>
+      <div class="sec-head fade">
+        <span class="no">04</span>
+        <h2>Instalasi (Windows)</h2>
+        <p>yt-dlp nggak perlu di-install, karena bot download sendiri waktu pertama start. Cookies dan troubleshooting ada di <a href="https://github.com/adrawsf/music-dc#readme">README</a>.</p>
       </div>
-      <div class="start">
-        <div class="steps reveal">
-          <div class="stepc">
-            <h3>Install Node &amp; FFmpeg</h3>
-            <p>Habis install, tutup lalu buka lagi terminal-nya biar PATH ke-refresh.</p>
+      <div class="install">
+        <div class="steps fade">
+          <div class="step">
+            <h3>Install Node.js dan FFmpeg</h3>
+            <p>Habis itu tutup lalu buka lagi terminal-nya supaya PATH ke-refresh.</p>
             <div class="code"><pre>winget install OpenJS.NodeJS.LTS
-winget install Gyan.FFmpeg</pre><button class="copy" type="button">Copy</button></div>
+winget install Gyan.FFmpeg</pre><button class="copy" type="button" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
           </div>
-          <div class="stepc">
-            <h3>Clone &amp; isi <code>.env</code></h3>
+          <div class="step">
+            <h3>Clone dan isi .env</h3>
             <p>Isi <code>DISCORD_TOKEN</code> dan <code>CLIENT_ID</code> dari Discord Developer Portal.</p>
             <div class="code"><pre>git clone https://github.com/adrawsf/music-dc.git
 cd music-dc
-copy .env.example .env</pre><button class="copy" type="button">Copy</button></div>
+copy .env.example .env</pre><button class="copy" type="button" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
           </div>
-          <div class="stepc">
-            <h3>Install, daftarkan command, jalan!</h3>
-            <p>Masuk voice channel, terus ketik <code>/play</code> di Discord.</p>
+          <div class="step">
+            <h3>Install, daftarkan command, jalankan</h3>
+            <p>Lalu masuk voice channel dan ketik <code>/play</code>.</p>
             <div class="code"><pre>npm install
 npm run deploy
-npm start</pre><button class="copy" type="button">Copy</button></div>
+npm start</pre><button class="copy" type="button" aria-label="Copy"><svg class="icon"><use href="#i-copy"/></svg></button></div>
           </div>
         </div>
-        <div class="terminal reveal" aria-label="Contoh output terminal">
-          <div class="term-head"><i></i><i></i><i></i><span>PowerShell · music-dc</span></div>
+        <div class="term fade" aria-label="Contoh output terminal">
+          <div class="term-head"><span>PowerShell</span><button type="button" id="termReplay"><svg class="icon"><use href="#i-rotate"/></svg>ulangi</button></div>
           <div class="term-body" id="term"></div>
-          <button class="btn term-replay" id="termReplay" type="button">↻ Ulangi</button>
         </div>
       </div>
     </div>
@@ -555,11 +461,8 @@ npm start</pre><button class="copy" type="button">Copy</button></div>
 
 <footer>
   <div class="wrap">
-    <div>
-      <a class="logo" href="#top"><span class="logo-mark">🎧</span> music-dc</a>
-      <p class="tos">Streaming dari YouTube melanggar ToS YouTube. Aman buat dipakai pribadi atau di server tongkrongan, tapi jangan dipublikasikan atau dimonetisasi. Project ini nggak berafiliasi dengan Discord maupun YouTube.</p>
-    </div>
-    <a class="btn btn-primary" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener">⭐ Lihat source di GitHub</a>
+    <p>Streaming dari YouTube melanggar ToS YouTube. Pakai buat server pribadi atau tongkrongan, jangan dipublikasikan atau dimonetisasi. Nggak berafiliasi dengan Discord maupun YouTube.</p>
+    <a class="gh" href="https://github.com/adrawsf/music-dc" target="_blank" rel="noopener"><svg class="icon fill"><use href="#i-github"/></svg>adrawsf/music-dc</a>
   </div>
 </footer>
 
@@ -571,505 +474,294 @@ npm start</pre><button class="copy" type="button">Copy</button></div>
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const sleep = (ms) => new Promise((r) => setTimeout(r, reduceMotion ? 0 : ms));
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const icon = (id, cls = 'icon') => `<svg class="${cls}"><use href="#i-${id}"/></svg>`;
 
-  /* ---------- nav + reveal ---------- */
-  const nav = $('#nav');
-  const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 20);
-  window.addEventListener('scroll', onScroll, { passive: true });
-  onScroll();
+  /* fade-in */
+  const io = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }), { threshold: 0.1 });
+  $$('.fade').forEach((el) => io.observe(el));
 
-  const revealer = new IntersectionObserver((entries) => {
-    for (const e of entries) if (e.isIntersecting) { e.target.classList.add('in'); revealer.unobserve(e.target); }
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-  $$('.reveal').forEach((el, i) => { el.style.transitionDelay = `${(i % 3) * 70}ms`; revealer.observe(el); });
+  /* ---------- demo state (dipakai juga oleh osiloskop) ---------- */
+  const st = { current: null, pos: 0, queue: [], loop: 0, next: 0, inVoice: false };
 
-  /* ---------- hero visualizer ---------- */
-  const canvas = $('#viz');
-  const ctx = canvas.getContext('2d');
-  const BARS = 120;
-  const levels = new Float32Array(BARS);
-  let W = 0, H = 0;
-  let analyser = null, freqData = null;
-  const pointer = { x: 0.5, y: 0.5, tx: 0.5, ty: 0.5 };
-  let heroVisible = true;
+  /* ---------- osiloskop ---------- */
+  const cv = $('#scope'), g = cv.getContext('2d');
+  const scopeState = $('#scopeState'), scopeLive = $('#scopeLive'), scopeRead = $('#scopeRead'), scopeTrack = $('#scopeTrack');
+  const ptr = { x: 0.35, y: 0.5, tx: 0.35, ty: 0.5 };
+  let W = 0, H = 0, energy = 0, scopeVisible = true;
 
-  function resize() {
+  function sizeScope() {
     const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    W = canvas.clientWidth; H = canvas.clientHeight;
-    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = '#07070c'; ctx.fillRect(0, 0, W, H);
+    W = cv.clientWidth; H = cv.clientHeight;
+    cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
+    g.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
-  window.addEventListener('resize', resize);
-  resize();
+  window.addEventListener('resize', sizeScope);
+  sizeScope();
+  window.addEventListener('pointermove', (e) => {
+    ptr.tx = e.clientX / window.innerWidth;
+    ptr.ty = e.clientY / window.innerHeight;
+  }, { passive: true });
 
-  $('.hero').addEventListener('pointermove', (e) => {
-    const r = canvas.getBoundingClientRect();
-    pointer.tx = (e.clientX - r.left) / r.width;
-    pointer.ty = (e.clientY - r.top) / r.height;
-  });
-
-  function sampleLevels(t) {
-    if (analyser) {
-      analyser.getByteFrequencyData(freqData);
-      const usable = Math.floor(freqData.length * 0.72);
-      for (let i = 0; i < BARS; i++) {
-        const half = i < BARS / 2 ? i : BARS - 1 - i; // simetris
-        const idx = Math.floor(Math.pow(half / (BARS / 2), 1.6) * (usable - 1));
-        const v = freqData[idx] / 255;
-        levels[i] += (v - levels[i]) * 0.35;
-      }
-      return;
-    }
-    // Tanpa suara: gelombang tenang yang "bernafas"
-    const beat = Math.pow(Math.max(0, Math.sin(t * 2.2)), 12) * 0.25;
-    for (let i = 0; i < BARS; i++) {
-      const a = (i / BARS) * Math.PI * 2;
-      const v = 0.22 + 0.12 * Math.sin(t * 1.1 + a * 3) + 0.08 * Math.sin(t * 2.3 - a * 5) + beat * (0.6 + 0.4 * Math.sin(a * 2));
-      levels[i] += (v - levels[i]) * 0.08;
-    }
+  function grid() {
+    g.fillStyle = '#0b0b0a'; g.fillRect(0, 0, W, H);
+    g.strokeStyle = '#1e1e1b'; g.lineWidth = 1;
+    const cols = 10, rows = 6;
+    g.beginPath();
+    for (let i = 1; i < cols; i++) { const x = Math.round((W / cols) * i) + 0.5; g.moveTo(x, 0); g.lineTo(x, H); }
+    for (let j = 1; j < rows; j++) { const y = Math.round((H / rows) * j) + 0.5; g.moveTo(0, y); g.lineTo(W, y); }
+    g.stroke();
+    g.strokeStyle = '#2a2a26';
+    g.beginPath(); g.moveTo(0, Math.round(H / 2) + 0.5); g.lineTo(W, Math.round(H / 2) + 0.5); g.stroke();
   }
 
-  function draw(now) {
-    requestAnimationFrame(draw);
-    if (!heroVisible) return;
+  function frame(now) {
+    if (!reduceMotion) requestAnimationFrame(frame);
+    if (!scopeVisible && !reduceMotion) return;
     const t = now / 1000;
-    sampleLevels(t);
-    pointer.x += (pointer.tx - pointer.x) * 0.05;
-    pointer.y += (pointer.ty - pointer.y) * 0.05;
+    ptr.x += (ptr.tx - ptr.x) * 0.06; ptr.y += (ptr.ty - ptr.y) * 0.06;
+    const playing = !!st.current;
+    energy += ((playing ? 1 : 0.18) - energy) * 0.03;
 
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'rgba(7, 7, 12, 0.22)';
-    ctx.fillRect(0, 0, W, H);
-
-    let avg = 0;
-    for (let i = 0; i < BARS; i++) avg += levels[i];
-    avg /= BARS;
-
-    const cx = W * (0.5 + (pointer.x - 0.5) * 0.06);
-    const cy = H * (0.46 + (pointer.y - 0.5) * 0.06);
-    const base = Math.min(W, H) * (W < 700 ? 0.3 : 0.24);
-    const radius = base * (0.92 + avg * 0.35);
-    const rot = t * 0.06;
-
-    // glow di tengah
-    const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, radius * 1.6);
-    glow.addColorStop(0, `rgba(139, 92, 246, ${0.10 + avg * 0.25})`);
-    glow.addColorStop(0.5, `rgba(236, 72, 153, ${0.05 + avg * 0.12})`);
-    glow.addColorStop(1, 'rgba(7, 7, 12, 0)');
-    ctx.fillStyle = glow;
-    ctx.beginPath(); ctx.arc(cx, cy, radius * 1.6, 0, Math.PI * 2); ctx.fill();
-
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.lineCap = 'round';
-    const lw = Math.max(2, (Math.PI * 2 * radius) / BARS * 0.42);
-    for (let i = 0; i < BARS; i++) {
-      const a = (i / BARS) * Math.PI * 2 + rot;
-      const len = 6 + levels[i] * base * 0.95;
-      const hue = 265 + Math.sin(i / BARS * Math.PI * 2 + t * 0.4) * 50 + levels[i] * 40;
-      ctx.strokeStyle = `hsla(${hue}, 90%, ${58 + levels[i] * 18}%, ${0.55 + levels[i] * 0.45})`;
-      ctx.lineWidth = lw;
-      const cos = Math.cos(a), sin = Math.sin(a);
-      ctx.beginPath();
-      ctx.moveTo(cx + cos * radius, cy + sin * radius);
-      ctx.lineTo(cx + cos * (radius + len), cy + sin * (radius + len));
-      ctx.stroke();
-      // pantulan ke dalam
-      ctx.strokeStyle = `hsla(${hue + 40}, 90%, 60%, ${0.12 + levels[i] * 0.2})`;
-      ctx.beginPath();
-      ctx.moveTo(cx + cos * (radius - 6), cy + sin * (radius - 6));
-      ctx.lineTo(cx + cos * (radius - 6 - len * 0.25), cy + sin * (radius - 6 - len * 0.25));
-      ctx.stroke();
+    grid();
+    const cycles = 1.5 + ptr.x * 5;
+    const amp = (0.12 + (1 - ptr.y) * 0.3) * energy * H;
+    const mid = H / 2;
+    g.lineWidth = 2; g.strokeStyle = '#ff6a2b'; g.lineJoin = 'round';
+    g.beginPath();
+    for (let x = 0; x <= W; x += 2) {
+      const p = (x / W) * Math.PI * 2 * cycles;
+      let y = Math.sin(p + t * 3) + 0.35 * Math.sin(p * 2.01 - t * 5) + 0.18 * Math.sin(p * 3.7 + t * 2);
+      if (playing) y += 0.22 * Math.sin(p * 9 + t * 11) * Math.sin(t * 1.7);
+      y = y / 1.6;
+      x === 0 ? g.moveTo(x, mid - y * amp) : g.lineTo(x, mid - y * amp);
     }
+    g.stroke();
+    // trigger marker
+    g.fillStyle = '#ff6a2b';
+    g.beginPath(); g.moveTo(0, mid - 5); g.lineTo(6, mid); g.lineTo(0, mid + 5); g.fill();
 
-    // gelombang di bawah
-    for (let k = 0; k < 3; k++) {
-      ctx.beginPath();
-      const amp = (18 + avg * 90) * (1 - k * 0.25);
-      const yBase = H * (0.82 + k * 0.05);
-      for (let x = 0; x <= W; x += 12) {
-        const y = yBase + Math.sin(x * 0.006 + t * (0.8 + k * 0.3) + k) * amp * Math.sin(x / W * Math.PI);
-        x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = ['rgba(139, 92, 246, 0.35)', 'rgba(236, 72, 153, 0.25)', 'rgba(34, 211, 238, 0.22)'][k];
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
-    }
+    const hz = Math.round(110 * Math.pow(2, ptr.x * 4));
+    scopeRead.textContent = `${hz} Hz · ${Math.round(amp / (H / 2) * 100)}%`;
   }
+  new IntersectionObserver(([e]) => { scopeVisible = e.isIntersecting; }).observe(cv);
+  requestAnimationFrame(frame);
 
-  new IntersectionObserver(([e]) => { heroVisible = e.isIntersecting; }).observe($('.hero'));
-  if (reduceMotion) {
-    // render sekali, tanpa animasi
-    for (let i = 0; i < BARS; i++) levels[i] = 0.25 + 0.1 * Math.sin(i / 6);
-    draw(0);
-    heroVisible = false;
-  } else {
-    requestAnimationFrame(draw);
+  function syncScope() {
+    scopeLive.classList.toggle('on', !!st.current);
+    scopeState.textContent = st.current ? 'PLAYING' : st.inVoice ? 'IDLE · di voice' : 'IDLE';
+    scopeTrack.textContent = st.current ? `${st.current.t} — ${st.current.a}` : '—';
+    if (reduceMotion) frame(0);
   }
-
-  /* ---------- generative lo-fi (Web Audio) ---------- */
-  const soundBtn = $('#soundBtn');
-  let ac = null, master = null, schedTimer = null, nextTime = 0, step = 0, noiseBuf = null;
-  const BPM = 82, STEP = 60 / BPM / 2; // 1 step = not 1/8
-  const CHORDS = [
-    [57, 60, 64, 67], // Am7
-    [53, 57, 60, 64], // Fmaj7
-    [48, 55, 59, 64], // Cmaj7
-    [55, 59, 62, 65], // G7
-  ];
-  const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
-
-  function voice(type, freq, start, dur, gain, cutoff) {
-    const o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
-    o.type = type; o.frequency.value = freq;
-    f.type = 'lowpass'; f.frequency.value = cutoff;
-    g.gain.setValueAtTime(0.0001, start);
-    g.gain.exponentialRampToValueAtTime(gain, start + Math.min(0.25, dur * 0.3));
-    g.gain.exponentialRampToValueAtTime(0.0001, start + dur);
-    o.connect(f); f.connect(g); g.connect(master);
-    o.start(start); o.stop(start + dur + 0.05);
-  }
-  function kick(t) {
-    const o = ac.createOscillator(), g = ac.createGain();
-    o.frequency.setValueAtTime(140, t); o.frequency.exponentialRampToValueAtTime(42, t + 0.18);
-    g.gain.setValueAtTime(0.9, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.35);
-    o.connect(g); g.connect(master); o.start(t); o.stop(t + 0.4);
-  }
-  function noise(t, dur, gain, hp) {
-    const s = ac.createBufferSource(), f = ac.createBiquadFilter(), g = ac.createGain();
-    s.buffer = noiseBuf; f.type = 'highpass'; f.frequency.value = hp;
-    g.gain.setValueAtTime(gain, t); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    s.connect(f); f.connect(g); g.connect(master); s.start(t, Math.random()); s.stop(t + dur + 0.02);
-  }
-  function scheduleStep(s, t) {
-    const bar = Math.floor(s / 8) % CHORDS.length;
-    const pos = s % 8;
-    const chord = CHORDS[bar];
-    const swing = pos % 2 ? STEP * 0.12 : 0;
-    t += swing;
-    if (pos === 0) {
-      for (const n of chord) voice('triangle', mtof(n), t, STEP * 8.2, 0.05, 1400);
-      voice('sine', mtof(chord[0] - 12), t, STEP * 3, 0.22, 400);
-    }
-    if (pos === 5) voice('sine', mtof(chord[0] - 12), t, STEP * 2.5, 0.16, 400);
-    if (pos === 0 || pos === 5) kick(t);
-    if (pos === 2 || pos === 6) noise(t, 0.18, 0.12, 1800);
-    noise(t, 0.04, pos % 2 ? 0.025 : 0.04, 7000);
-    if (Math.random() < 0.42) {
-      const n = chord[Math.floor(Math.random() * chord.length)] + 12;
-      voice('square', mtof(n), t, STEP * 1.6, 0.025, 2200);
-    }
-  }
-  function scheduler() {
-    while (nextTime < ac.currentTime + 0.15) { scheduleStep(step, nextTime); nextTime += STEP; step++; }
-  }
-  async function startSound() {
-    const Ctx = window.AudioContext || window.webkitAudioContext;
-    if (!Ctx) throw new Error('Web Audio nggak didukung');
-    ac = new Ctx();
-    await ac.resume();
-    master = ac.createGain();
-    master.gain.setValueAtTime(0.0001, ac.currentTime);
-    master.gain.exponentialRampToValueAtTime(0.55, ac.currentTime + 1.2);
-    const comp = ac.createDynamicsCompressor();
-    analyser = ac.createAnalyser();
-    analyser.fftSize = 512; analyser.smoothingTimeConstant = 0.78;
-    freqData = new Uint8Array(analyser.frequencyBinCount);
-    master.connect(comp); comp.connect(analyser); analyser.connect(ac.destination);
-    noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
-    const d = noiseBuf.getChannelData(0);
-    for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
-    step = 0; nextTime = ac.currentTime + 0.1;
-    schedTimer = setInterval(scheduler, 25);
-  }
-  function stopSound() {
-    clearInterval(schedTimer);
-    const old = ac, g = master;
-    analyser = null; ac = null; master = null;
-    try { g.gain.cancelScheduledValues(old.currentTime); g.gain.setValueAtTime(g.gain.value, old.currentTime); g.gain.exponentialRampToValueAtTime(0.0001, old.currentTime + 0.5); } catch (_) {}
-    setTimeout(() => old.close().catch(() => {}), 700);
-  }
-  soundBtn.addEventListener('click', async () => {
-    const on = soundBtn.getAttribute('aria-pressed') === 'true';
-    if (on) {
-      stopSound();
-      soundBtn.setAttribute('aria-pressed', 'false');
-      soundBtn.textContent = '🔊 Nyalain vibe-nya';
-      return;
-    }
-    try {
-      await startSound();
-      soundBtn.setAttribute('aria-pressed', 'true');
-      soundBtn.textContent = '🔇 Matiin suara';
-      if (reduceMotion) { heroVisible = true; }
-    } catch (err) {
-      $('#soundNote').textContent = 'Browser lo nggak bisa muter audio di sini, tapi visualizer-nya tetap jalan.';
-    }
-  });
-  document.addEventListener('visibilitychange', () => {
-    if (!ac) return;
-    if (document.hidden) ac.suspend(); else ac.resume();
-  });
 
   /* ---------- chat demo ---------- */
   const SONGS = [
-    { t: 'Lampu Kota Jam Dua', a: 'Senandika', d: 214, e: '🌃' },
-    { t: 'Hujan di Kaliurang', a: 'Kopi Pagi', d: 187, e: '🌧️' },
-    { t: 'Sore yang Kebanyakan Gula', a: 'Rumah Kaca', d: 241, e: '🍬' },
-    { t: 'Angkot Terakhir', a: 'Senandika', d: 198, e: '🚐' },
-    { t: 'Lo-fi buat Ngerjain Skripsi', a: 'Anak Kos Records', d: 263, e: '📚' },
-    { t: 'Bensin Tinggal Segaris', a: 'Motor Tua', d: 176, e: '🏍️' },
+    { t: 'Lampu Kota Jam Dua', a: 'Senandika', d: 214 },
+    { t: 'Hujan di Kaliurang', a: 'Kopi Pagi', d: 187 },
+    { t: 'Sore yang Kebanyakan Gula', a: 'Rumah Kaca', d: 241 },
+    { t: 'Angkot Terakhir', a: 'Senandika', d: 198 },
+    { t: 'Lagu buat Ngerjain Skripsi', a: 'Anak Kos', d: 263 },
+    { t: 'Bensin Tinggal Segaris', a: 'Motor Tua', d: 176 },
   ];
   const LOOP_LABEL = ['off', '🔂 lagu', '🔁 queue'];
   const LOOP_MSG = ['➡️ Loop mati', '🔂 Loop lagu ini', '🔁 Loop seluruh queue'];
-  const SPEED = 3; // demo: 1 detik = 3 detik lagu
+  const SPEED = 3;
 
-  const log = $('#chatLog'), typing = $('#typing'), input = $('#chatInput');
-  const eq = $('#eq'), voiceText = $('#voiceText');
+  const log = $('#log'), typing = $('#typing'), input = $('#input'), voice = $('#voice'), voiceText = $('#voiceText');
   const buttons = $$('.cmd');
-  const st = { current: null, pos: 0, queue: [], loop: 0, next: 0, inVoice: false, idle: null };
-  let busy = false, autoplayCancelled = false;
+  let busy = false, userTookOver = false;
 
-  const fmt = (s) => { s = Math.floor(s); const m = Math.floor(s / 60); return `${m}:${String(s % 60).padStart(2, '0')}`; };
+  const fmt = (s) => { s = Math.floor(s); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
   const bar = (pos, len, size = 15) => { const f = Math.round(Math.min(pos / len, 1) * size); return '▬'.repeat(f) + '🔘' + '▬'.repeat(Math.max(size - f, 0)); };
   const line = (s) => `<a href="#demo" onclick="return false">${esc(s.t)}</a> <span class="dur">${fmt(s.d)}</span>`;
-  const now = () => new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  const clock = () => new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+  const embed = (html, cls = '') => `<div class="embed ${cls}">${html}</div>`;
+  const eph = (text) => `<div class="eph">${text}<small>${icon('eye')}Cuma kamu yang bisa lihat pesan ini</small></div>`;
 
   function setVoice() {
-    eq.classList.toggle('on', !!st.current && !reduceMotion);
-    voiceText.textContent = st.current ? `memutar di 🔊 Nongkrong` : st.inVoice ? 'di 🔊 Nongkrong (idle)' : 'bot belum join voice';
+    voice.classList.toggle('on', !!st.current);
+    voiceText.textContent = st.current ? 'memutar di Nongkrong' : st.inVoice ? 'di Nongkrong, idle' : 'belum di voice';
+    syncScope();
   }
-  function scrollLog() { log.scrollTop = log.scrollHeight; }
   function add(who, html) {
     const m = document.createElement('div');
     m.className = 'msg';
     m.innerHTML = who === 'user'
-      ? `<div class="avatar user">😎</div><div class="msg-body"><div class="msg-meta"><b>kamu</b><time>${now()}</time></div>${html}</div>`
-      : `<div class="avatar bot">🎧</div><div class="msg-body"><div class="msg-meta"><b>music-dc</b><span class="tag">BOT</span><time>${now()}</time></div>${html}</div>`;
+      ? `<div class="av user">${icon('user')}</div><div class="body"><div class="meta"><b>kamu</b><time>${clock()}</time></div>${html}</div>`
+      : `<div class="av bot">${icon('music')}</div><div class="body"><div class="meta"><b>music-dc</b><span class="tag">BOT</span><time>${clock()}</time></div>${html}</div>`;
     log.appendChild(m);
     while (log.children.length > 40) log.firstElementChild.remove();
-    scrollLog();
-    return m;
+    log.scrollTop = log.scrollHeight;
   }
-  const embed = (html, extra = '') => `<div class="embed ${extra}">${html}</div>`;
-  const eph = (text) => `<div class="ephemeral">${text}<small>👁 Cuma kamu yang bisa lihat pesan ini</small></div>`;
+  const npEmbed = (s) => embed(`🎶 <b>Now playing:</b> ${line(s)}<br>Requested by <span class="mention">@kamu</span>`);
+  const liveEmbed = (s) => embed(
+    `<div>🎶 ${line(s)}<br><span style="color:var(--muted)">${esc(s.a)}</span><br><br>` +
+    `<span class="bar" data-live>${bar(st.pos, s.d)}</span><br><span class="dur" data-live-time>${fmt(st.pos)} / ${fmt(s.d)}</span><br>🔊 60%</div>` +
+    `<div class="art">${icon('music')}</div>`, 'thumb');
 
-  function npEmbed(s) {
-    return embed(`🎶 <b>Now playing:</b> ${line(s)}<br>Requested by <span class="mention">@kamu</span>`);
-  }
-  function liveEmbed(s) {
-    return embed(
-      `<div>🎶 ${line(s)}<br><span style="color:var(--muted)">${esc(s.a)}</span><br><br>` +
-      `<span class="bar" data-live>${bar(st.pos, s.d)}</span><br><span class="dur" data-live-time>${fmt(st.pos)} / ${fmt(s.d)}</span>` +
-      `<br>🔊 60%</div><div class="thumb">${s.e}</div>`, 'with-thumb');
-  }
-
-  async function typeCommand(name, arg) {
+  async function typeCmd(name, arg) {
     input.classList.add('active');
     const text = `/${name}${arg ? ' ' + arg : ''}`;
     for (let i = 1; i <= text.length; i++) {
       input.innerHTML = esc(text.slice(0, i)) + '<span class="caret"></span>';
-      await sleep(i <= name.length + 1 ? 45 : 18);
+      await sleep(i <= name.length + 1 ? 45 : 16);
     }
-    await sleep(250);
+    await sleep(220);
     input.classList.remove('active');
-    input.textContent = 'Kirim pesan ke #musik-tongkrongan';
-    add('user', `<span class="slash"><span class="name">/${esc(name)}</span>${arg ? `<span class="arg">query: ${esc(arg)}</span>` : ''}</span>`);
+    input.textContent = 'Kirim pesan ke #musik';
+    add('user', `<span class="slash"><span class="n">/${esc(name)}</span>${arg ? ` <span class="a">${esc(arg)}</span>` : ''}</span>`);
   }
-  async function think(ms = 700) { typing.classList.add('on'); scrollLog(); await sleep(ms); typing.classList.remove('on'); }
+  async function think(ms) { typing.classList.add('on'); log.scrollTop = log.scrollHeight; await sleep(ms); typing.classList.remove('on'); }
 
-  function startSong(s, announce = true) {
-    st.current = s; st.pos = 0; st.inVoice = true;
-    clearTimeout(st.idle); st.idle = null;
-    setVoice();
-    if (announce) add('bot', npEmbed(s));
-  }
-  function finishQueue() {
-    st.current = null; setVoice();
-    add('bot', embed('✅ Queue habis. Tambahin lagu pakai <code>/play</code>, atau gue cabut dalam 2 menit.'));
-  }
+  function startSong(s) { st.current = s; st.pos = 0; st.inVoice = true; setVoice(); add('bot', npEmbed(s)); }
+  function finishQueue() { st.current = null; setVoice(); add('bot', embed('✅ Queue habis. Tambahin lagu pakai <code>/play</code>, atau gue cabut dalam 2 menit.')); }
+  const noPlayer = () => add('bot', eph('❌ Lagi nggak ada lagu yang diputar.'));
 
   const commands = {
     async play() {
-      const s = SONGS[st.next % SONGS.length]; st.next++;
-      await typeCommand('play', s.t.toLowerCase());
+      const s = SONGS[st.next++ % SONGS.length];
+      await typeCmd('play', s.t.toLowerCase());
       await think(900);
-      if (!st.current) {
-        add('bot', embed(`▶️ Memutar ${line(s)}`));
-        await sleep(450);
-        startSong(s);
-      } else {
-        st.queue.push(s);
-        add('bot', embed(`➕ Masuk queue (#${st.queue.length}): ${line(s)}`));
-      }
+      if (!st.current) { add('bot', embed(`▶️ Memutar ${line(s)}`)); await sleep(400); startSong(s); }
+      else { st.queue.push(s); add('bot', embed(`➕ Masuk queue (#${st.queue.length}): ${line(s)}`)); }
     },
     async queue() {
-      await typeCommand('queue');
-      await think(450);
-      if (!st.current) return add('bot', eph('❌ Lagi nggak ada lagu yang diputar.'));
-      const list = st.queue.length
-        ? st.queue.map((s, i) => `<code>${i + 1}.</code> ${line(s)}`).join('<br>')
-        : '<i>Queue kosong</i>';
+      await typeCmd('queue'); await think(450);
+      if (!st.current) return noPlayer();
+      const list = st.queue.length ? st.queue.map((s, i) => `<code>${i + 1}.</code> ${line(s)}`).join('<br>') : '<i>Queue kosong</i>';
       const total = st.queue.reduce((a, s) => a + s.d, 0);
-      add('bot', embed(`<b>Now playing:</b> ${line(st.current)}<br><br>${list}<br><br>${st.queue.length} lagu • total ${total ? fmt(total) : '0:00'} • loop: ${LOOP_LABEL[st.loop]}<div class="foot">Halaman 1/1</div>`));
+      add('bot', embed(`<b>Now playing:</b> ${line(st.current)}<br><br>${list}<br><br>${st.queue.length} lagu • total ${fmt(total)} • loop: ${LOOP_LABEL[st.loop]}<div class="foot">Halaman 1/1</div>`));
     },
     async nowplaying() {
-      await typeCommand('nowplaying');
-      await think(450);
-      if (!st.current) return add('bot', eph('❌ Lagi nggak ada lagu yang diputar.'));
+      await typeCmd('nowplaying'); await think(450);
+      if (!st.current) return noPlayer();
       $$('[data-live]').forEach((el) => el.removeAttribute('data-live'));
       $$('[data-live-time]').forEach((el) => el.removeAttribute('data-live-time'));
       add('bot', liveEmbed(st.current));
     },
     async loop() {
-      const nextMode = (st.loop + 1) % 3;
-      await typeCommand('loop', ['off', 'lagu ini', 'seluruh queue'][nextMode]);
-      await think(400);
-      if (!st.current) return add('bot', eph('❌ Lagi nggak ada lagu yang diputar.'));
-      st.loop = nextMode;
-      add('bot', embed(LOOP_MSG[st.loop]));
+      const mode = (st.loop + 1) % 3;
+      await typeCmd('loop', ['off', 'lagu ini', 'seluruh queue'][mode]); await think(400);
+      if (!st.current) return noPlayer();
+      st.loop = mode; add('bot', embed(LOOP_MSG[mode]));
     },
     async skip() {
-      await typeCommand('skip');
-      await think(500);
-      if (!st.current) return add('bot', eph('❌ Lagi nggak ada lagu yang diputar.'));
+      await typeCmd('skip'); await think(500);
+      if (!st.current) return noPlayer();
       const skipped = st.current;
       add('bot', embed(`⏭️ Skip <b>${esc(skipped.t)}</b>`));
       if (st.loop === 2) st.queue.push(skipped);
       const next = st.queue.shift();
-      await sleep(400);
-      if (next) startSong(next); else finishQueue();
+      await sleep(350);
+      next ? startSong(next) : finishQueue();
     },
     async stop() {
-      await typeCommand('stop');
-      await think(400);
-      if (!st.inVoice) return add('bot', eph('❌ Lagi nggak ada lagu yang diputar.'));
-      st.current = null; st.queue = []; st.loop = 0; st.inVoice = false;
-      clearTimeout(st.idle); st.idle = null;
-      setVoice();
-      add('bot', embed('⏹️ Stop. Sampai jumpa!'));
+      await typeCmd('stop'); await think(400);
+      if (!st.inVoice) return noPlayer();
+      Object.assign(st, { current: null, queue: [], loop: 0, inVoice: false });
+      setVoice(); add('bot', embed('⏹️ Stop. Sampai jumpa!'));
     },
   };
-
   async function run(name) {
     if (busy) return;
     busy = true; buttons.forEach((b) => (b.disabled = true));
     try { await commands[name](); } finally { busy = false; buttons.forEach((b) => (b.disabled = false)); }
   }
-  buttons.forEach((b) => b.addEventListener('click', () => { autoplayCancelled = true; run(b.dataset.cmd); }));
+  buttons.forEach((b) => b.addEventListener('click', () => { userTookOver = true; run(b.dataset.cmd); }));
 
-  // jam lagu
   setInterval(() => {
     if (!st.current || document.hidden) return;
     st.pos += SPEED;
     if (st.pos >= st.current.d) {
       if (st.loop === 1) { st.pos = 0; add('bot', npEmbed(st.current)); }
-      else {
-        if (st.loop === 2) st.queue.push(st.current);
-        const next = st.queue.shift();
-        if (next) startSong(next); else finishQueue();
-      }
+      else { if (st.loop === 2) st.queue.push(st.current); const n = st.queue.shift(); n ? startSong(n) : finishQueue(); }
     }
-    if (st.current) {
-      $$('[data-live]').forEach((el) => (el.textContent = bar(st.pos, st.current.d)));
-      $$('[data-live-time]').forEach((el) => (el.textContent = `${fmt(st.pos)} / ${fmt(st.current.d)}`));
-    }
+    if (!st.current) return;
+    $$('[data-live]').forEach((el) => (el.textContent = bar(st.pos, st.current.d)));
+    $$('[data-live-time]').forEach((el) => (el.textContent = `${fmt(st.pos)} / ${fmt(st.current.d)}`));
   }, 1000);
 
-  // pesan pembuka + autoplay pas demo kelihatan
-  add('bot', embed('👋 Halo! Gue <b>music-dc</b>. Klik salah satu command di samping buat nyoba.'));
+  add('bot', embed('Halo. Klik command di sebelah buat nyoba.'));
   let autoplayed = false;
   new IntersectionObserver(async ([e], obs) => {
     if (!e.isIntersecting || autoplayed) return;
     autoplayed = true; obs.disconnect();
     if (reduceMotion) return;
-    await sleep(700);
-    for (const c of ['play', 'play', 'queue']) {
-      if (autoplayCancelled) break;
-      await run(c);
-      await sleep(900);
-    }
-  }, { threshold: 0.45 }).observe($('.chat'));
+    await sleep(600);
+    for (const c of ['play', 'play', 'queue']) { if (userTookOver) break; await run(c); await sleep(800); }
+  }, { threshold: 0.5 }).observe($('.chat'));
 
-  /* ---------- pipeline ---------- */
+  /* ---------- tahapan ---------- */
   const STAGES = [
-    { i: '👤', t: '/play', s: 'slash command', h: 'Lo ketik /play', p: 'Bot langsung deferReply, jadi punya waktu 15 menit buat jawab, bukan cuma 3 detik. Habis itu dia ngecek lo ada di voice channel yang sama, plus izin View Channel, Connect, dan Speak.', c: '/play query: lampu kota jam dua' },
-    { i: '🤖', t: 'Bot', s: 'discord.js + DisTube', h: 'DisTube ngatur antrian', p: 'Queue, loop, shuffle, volume, dan auto-leave diatur per server. Plugin yt-dlp buatan sendiri dipasang sebagai satu-satunya extractor.', c: 'new DisTube(client, {\n  plugins: [new YtDlpPlugin()],\n})' },
-    { i: '📼', t: 'yt-dlp', s: 'cari & download', h: 'yt-dlp yang kerja keras', p: 'Judul dicari pakai ytsearch1:, playlist dibaca pakai --flat-playlist. Pas lagu mau diputar, yt-dlp download audio terbaik ke stdout dan nyelesaiin challenge JS YouTube pakai Node.', c: 'yt-dlp --js-runtimes node \\\n  -f ba/ba*/b -o - -- <url>' },
-    { i: '🔌', t: '127.0.0.1', s: 'pipe lokal', h: 'Pipa lokal anti-403', p: 'Byte audio lewat server HTTP mini di 127.0.0.1, dengan port acak dan token sekali pakai. FFmpeg nggak pernah ngomong langsung ke server YouTube.', c: 'http://127.0.0.1:60581/5a84…de87\n→ 404 kalau dipakai dua kali' },
-    { i: '🎞️', t: 'FFmpeg', s: 'decode ke PCM', h: 'FFmpeg decode audionya', p: 'Audio Opus/WebM dari YouTube di-decode jadi PCM 48 kHz stereo. Volume 1–150% diatur di tahap ini.', c: 'ffmpeg -i <pipe> -ar 48000 -ac 2 \\\n  -f s16le pipe:1' },
-    { i: '🔊', t: 'Voice', s: 'Opus + DAVE', h: 'Sampai di telinga lo', p: '@discordjs/opus encode ulang ke Opus, lalu @discordjs/voice 0.19 mengirimnya lewat voice terenkripsi end-to-end (DAVE).', c: '@discordjs/voice 0.19\n@snazzah/davey  (DAVE / E2EE)' },
+    { i: 'user', t: '/play', s: 'slash command', h: 'Command masuk', p: 'Bot langsung deferReply supaya punya waktu lebih dari 3 detik buat jawab. Lalu dia ngecek kamu ada di voice channel yang sama, dan bot punya izin View Channel, Connect, dan Speak.', c: '/play query: lampu kota jam dua' },
+    { i: 'bot', t: 'Bot', s: 'discord.js + DisTube', h: 'DisTube ngatur antrian', p: 'Antrian, loop, shuffle, volume, dan auto-leave disimpan per server. Satu-satunya extractor yang dipasang adalah plugin yt-dlp di src/ytdlp.js.', c: 'new DisTube(client, {\n  plugins: [new YtDlpPlugin()],\n})' },
+    { i: 'download', t: 'yt-dlp', s: 'cari dan download', h: 'yt-dlp cari dan download', p: 'Judul dicari pakai ytsearch1:, playlist dibaca pakai --flat-playlist. Waktu lagu mau diputar, yt-dlp download audio terbaik ke stdout. Challenge JavaScript dari YouTube diselesaikan pakai Node yang sedang jalan.', c: 'yt-dlp --js-runtimes node \\\n  -f ba/ba*/b -o - -- <url>' },
+    { i: 'plug', t: '127.0.0.1', s: 'pipe lokal', h: 'Server HTTP lokal', p: 'Byte audio dilewatkan lewat server HTTP kecil di 127.0.0.1, pakai port acak dan token sekali pakai. FFmpeg nggak pernah konek langsung ke server YouTube.', c: 'GET http://127.0.0.1:60581/5a84…de87\n200  (request kedua: 404)' },
+    { i: 'film', t: 'FFmpeg', s: 'decode ke PCM', h: 'FFmpeg decode', p: 'Audio dari YouTube di-decode jadi PCM 48 kHz stereo. Volume 1–150% diatur di tahap ini.', c: 'ffmpeg -i <pipe> -ar 48000 -ac 2 \\\n  -f s16le pipe:1' },
+    { i: 'volume', t: 'Voice', s: 'Opus + DAVE', h: 'Dikirim ke voice channel', p: '@discordjs/opus encode PCM ke Opus, lalu @discordjs/voice 0.19 mengirimnya lewat voice yang terenkripsi end-to-end (DAVE).', c: '@discordjs/voice   0.19\n@snazzah/davey     DAVE / E2EE' },
   ];
-  const pipe = $('#pipe'), detail = $('#detail');
+  const stages = $('#stages'), detail = $('#detail');
   STAGES.forEach((s, i) => {
-    if (i) { const l = document.createElement('div'); l.className = 'link'; l.setAttribute('aria-hidden', 'true'); pipe.appendChild(l); }
-    const n = document.createElement('button');
-    n.type = 'button'; n.className = 'node'; n.setAttribute('role', 'tab');
-    n.innerHTML = `<span class="step">0${i + 1}</span><span class="n-ico">${s.i}</span><b>${esc(s.t)}</b><span>${esc(s.s)}</span>`;
-    n.addEventListener('click', () => { cycleStopped = true; select(i); });
-    pipe.appendChild(n);
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'stage'; b.setAttribute('role', 'tab');
+    b.innerHTML = `${icon(s.i)}<span class="k">${String(i + 1).padStart(2, '0')}</span><b>${esc(s.t)}</b><span>${esc(s.s)}</span>` +
+      (i < STAGES.length - 1 ? icon('chevron', 'icon arrow') : '');
+    b.addEventListener('click', () => { pinned = true; select(i); });
+    stages.appendChild(b);
   });
-  const nodes = $$('.node', pipe);
-  let active = -1, cycleStopped = false;
+  const stageEls = $$('.stage', stages);
+  let active = -1, pinned = false, stagesVisible = false;
   function select(i) {
     if (i === active) return;
     active = i;
-    nodes.forEach((n, k) => { n.classList.toggle('active', k === i); n.setAttribute('aria-selected', String(k === i)); });
+    stageEls.forEach((el, k) => { el.classList.toggle('active', k === i); el.setAttribute('aria-selected', String(k === i)); });
     const s = STAGES[i];
-    detail.innerHTML = `<div class="fade"><div class="kicker" style="margin-bottom:10px">Langkah 0${i + 1}</div><h3>${esc(s.h)}</h3><p>${esc(s.p)}</p></div><pre class="fade">${esc(s.c)}</pre>`;
+    detail.innerHTML = `<div class="swap"><h3>${esc(s.h)}</h3><p>${esc(s.p)}</p></div><pre class="swap">${esc(s.c)}</pre>`;
   }
   select(0);
-  let pipeVisible = false;
-  new IntersectionObserver(([e]) => { pipeVisible = e.isIntersecting; }, { threshold: 0.3 }).observe(pipe);
-  if (!reduceMotion) setInterval(() => { if (!cycleStopped && pipeVisible && !document.hidden) select((active + 1) % STAGES.length); }, 3600);
+  new IntersectionObserver(([e]) => { stagesVisible = e.isIntersecting; }, { threshold: 0.4 }).observe(stages);
+  if (!reduceMotion) setInterval(() => { if (!pinned && stagesVisible && !document.hidden) select((active + 1) % STAGES.length); }, 4000);
 
-  /* ---------- feature card glow ---------- */
-  $$('.card').forEach((c) => c.addEventListener('pointermove', (e) => {
-    const r = c.getBoundingClientRect();
-    c.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    c.style.setProperty('--my', `${e.clientY - r.top}px`);
-  }));
-
-  /* ---------- copy buttons ---------- */
+  /* ---------- copy ---------- */
   $$('.copy').forEach((b) => b.addEventListener('click', async () => {
     const text = b.previousElementSibling.textContent;
     let ok = false;
     try { await navigator.clipboard.writeText(text); ok = true; } catch (_) {
       try {
-        const ta = document.createElement('textarea'); ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
-        document.body.appendChild(ta); ta.select(); ok = document.execCommand('copy'); ta.remove();
+        const ta = Object.assign(document.createElement('textarea'), { value: text });
+        ta.style.cssText = 'position:fixed;opacity:0'; document.body.appendChild(ta); ta.select();
+        ok = document.execCommand('copy'); ta.remove();
       } catch (_) {}
     }
-    b.textContent = ok ? 'Tersalin ✓' : 'Gagal'; b.classList.toggle('ok', ok);
-    setTimeout(() => { b.textContent = 'Copy'; b.classList.remove('ok'); }, 1600);
+    b.innerHTML = icon(ok ? 'check' : 'alert'); b.classList.toggle('ok', ok);
+    b.setAttribute('aria-label', ok ? 'Tersalin' : 'Gagal copy');
+    setTimeout(() => { b.innerHTML = icon('copy'); b.classList.remove('ok'); b.setAttribute('aria-label', 'Copy'); }, 1500);
   }));
 
   /* ---------- terminal ---------- */
   const TERM = [
-    ['p', 'PS C:\\music-dc> ', 'npm start'],
-    ['d', '', '\n> discord-music-bot@1.0.0 start\n> node src/index.js\n\n'],
-    ['ok', '', '🎞️  FFmpeg OK\n'],
-    ['ok', '', '🔄 yt-dlp: yt-dlp is up to date (stable@2026.10.26)\n'],
-    ['ok', '', '📼 yt-dlp 2026.10.26\n'],
-    ['ok', '', '✅ Logged in as music-dc#0001 (3 server)\n'],
+    ['cmd', 'npm start'],
+    ['d', '\n> discord-music-bot@1.0.0 start\n> node src/index.js\n\n'],
+    ['', '🎞️  FFmpeg OK\n'],
+    ['', '🔄 yt-dlp: yt-dlp is up to date (stable@2026.10.26)\n'],
+    ['', '📼 yt-dlp 2026.10.26\n'],
+    ['', '✅ Logged in as music-dc#0001 (3 server)\n'],
   ];
   const term = $('#term');
-  let termRun = 0;
+  let runId = 0;
   async function playTerm() {
-    const id = ++termRun;
+    const id = ++runId;
     term.innerHTML = '';
-    for (const [cls, prompt, text] of TERM) {
-      const span = document.createElement('span'); span.className = cls; term.appendChild(span);
-      if (prompt) { const p = document.createElement('span'); p.className = 'p'; p.textContent = prompt; span.before(p); }
-      if (cls === 'p') {
-        span.className = 'ok';
-        for (let i = 1; i <= text.length; i++) { if (id !== termRun) return; span.textContent = text.slice(0, i); await sleep(70); }
-        await sleep(350);
+    for (const [kind, text] of TERM) {
+      if (kind === 'cmd') {
+        const p = document.createElement('span'); p.className = 'p'; p.textContent = 'PS C:\\music-dc> '; term.appendChild(p);
+        const c = document.createElement('span'); term.appendChild(c);
+        for (let i = 1; i <= text.length; i++) { if (id !== runId) return; c.textContent = text.slice(0, i); await sleep(65); }
+        await sleep(300);
       } else {
-        span.textContent = text;
-        await sleep(cls === 'd' ? 500 : 650);
+        const s = document.createElement('span'); if (kind) s.className = kind; s.textContent = text; term.appendChild(s);
+        await sleep(kind === 'd' ? 450 : 600);
       }
-      if (id !== termRun) return;
+      if (id !== runId) return;
     }
     const caret = document.createElement('span'); caret.className = 'caret'; term.appendChild(caret);
   }

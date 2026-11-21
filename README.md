@@ -1,19 +1,8 @@
-<div align="center">
+# music-dc
 
-# 🎧 music-dc
+Bot musik Discord yang di-host sendiri. Jalan di satu proses Node pakai discord.js, DisTube, yt-dlp, dan FFmpeg, tanpa Lavalink, Java, atau Docker.
 
-**Bot musik Discord yang ringan, self-hosted, dan nggak butuh server audio terpisah.**
-Satu proses Node, plus yt-dlp dan FFmpeg. Nggak pakai Lavalink, Java, atau Docker.
-
-[**🌐 Lihat halaman project**](https://adrawsf.github.io/music-dc/) · [Mulai cepat](#-mulai-cepat) · [Cara kerja](#-cara-kerjanya) · [Troubleshooting](#-troubleshooting)
-
-![Node](https://img.shields.io/badge/node-%E2%89%A522.12-3c873a?logo=node.js&logoColor=white)
-![discord.js](https://img.shields.io/badge/discord.js-v14-5865f2?logo=discord&logoColor=white)
-![DisTube](https://img.shields.io/badge/DisTube-5-ff4f6d)
-![yt-dlp](https://img.shields.io/badge/yt--dlp-auto--update-red)
-![DAVE](https://img.shields.io/badge/voice-DAVE%20E2EE-8a5cf6)
-
-</div>
+[Halaman project](https://adrawsf.github.io/music-dc/) · [Mulai cepat](#mulai-cepat) · [Cara kerja](#cara-kerjanya) · [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -23,21 +12,21 @@ Versi pertama bot ini pakai **Lavalink**: server audio Java terpisah dengan plug
 
 **music-dc** menyederhanakan semuanya. Bot langsung pakai **yt-dlp**, tool paling cepat dapat fix tiap kali YouTube berubah, dan **FFmpeg**, dijalankan dari satu proses Node. Kalau YouTube error lagi, cukup `npm run update-ytdlp`.
 
-## ✨ Fitur
+## Fitur
 
 | | |
 |---|---|
-| 🎵 **Putar dari mana aja** | Judul lagu, link video, link playlist YouTube, plus SoundCloud, Bandcamp, dan [ratusan situs lain](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) yang didukung yt-dlp |
-| ⚡ **Playlist besar tetap cepat** | Daftar lagu dibaca pakai `--flat-playlist`. Playlist 182 lagu kebaca dalam ±4 detik |
-| 🛡️ **Anti HTTP 403** | yt-dlp sendiri yang download audionya, lalu di-pipe ke FFmpeg lewat `127.0.0.1`. FFmpeg nggak pernah ditolak server YouTube |
-| 🔐 **Voice E2EE (DAVE)** | `@discordjs/voice` 0.19 sudah support DAVE, enkripsi voice yang wajib di Discord sejak Maret 2026 |
-| 🍪 **Cookies opsional** | Buat video yang minta login atau "confirm you're not a bot" |
-| 🔄 **yt-dlp auto-update** | Didownload otomatis ke `bin/` dan di-update tiap bot start |
-| 👋 **Auto-leave** | Keluar 2 menit setelah queue habis, atau 1 menit setelah voice channel kosong |
-| 🏠 **Multi-server** | Queue, volume, loop, dan timer terpisah per server |
-| 🇮🇩 **Gaya bahasa santai** | Semua balasan bot pakai bahasa Indonesia santai, lengkap dengan embed |
+| **Putar dari mana aja** | Judul lagu, link video, link playlist YouTube, plus SoundCloud, Bandcamp, dan [ratusan situs lain](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) yang didukung yt-dlp |
+| **Playlist besar tetap cepat** | Daftar lagu dibaca pakai `--flat-playlist`. Playlist 182 lagu kebaca dalam ±4 detik |
+| **Anti HTTP 403** | yt-dlp sendiri yang download audionya, lalu di-pipe ke FFmpeg lewat `127.0.0.1`. FFmpeg nggak pernah ditolak server YouTube |
+| **Voice E2EE (DAVE)** | `@discordjs/voice` 0.19 sudah support DAVE, enkripsi voice yang wajib di Discord sejak Maret 2026 |
+| **Cookies opsional** | Buat video yang minta login atau "confirm you're not a bot" |
+| **yt-dlp auto-update** | Didownload otomatis ke `bin/` dan di-update tiap bot start |
+| **Auto-leave** | Keluar 2 menit setelah queue habis, atau 1 menit setelah voice channel kosong |
+| **Multi-server** | Queue, volume, loop, dan timer terpisah per server |
+| **Gaya bahasa santai** | Semua balasan bot pakai bahasa Indonesia santai, lengkap dengan embed |
 
-## 🎛️ Commands
+## Commands
 
 | Command | Fungsi |
 |---|---|
@@ -54,16 +43,16 @@ Versi pertama bot ini pakai **Lavalink**: server audio Java terpisah dengan plug
 
 Semua command musik ngecek dulu apakah lo ada di **voice channel yang sama** dengan bot. `/play` juga ngecek izin **View Channel / Connect / Speak** bot sebelum join.
 
-## 🧠 Cara kerjanya
+## Cara kerjanya
 
 ```mermaid
 flowchart LR
-    U["👤 /play di Discord"] --> B["🤖 Bot<br/>discord.js + DisTube"]
-    B -- "cari / baca link<br/>(ytsearch, --flat-playlist)" --> Y["📼 yt-dlp"]
-    Y -- "download audio (-o -)" --> P["🔌 Pipe lokal<br/>127.0.0.1"]
-    P --> F["🎞️ FFmpeg<br/>decode ke PCM"]
-    F --> O["🎚️ Opus + DAVE<br/>@discordjs/voice"]
-    O --> V["🔊 Voice channel"]
+    U["/play di Discord"] --> B["Bot<br/>discord.js + DisTube"]
+    B -- "cari / baca link<br/>(ytsearch, --flat-playlist)" --> Y["yt-dlp"]
+    Y -- "download audio (-o -)" --> P["Pipe lokal<br/>127.0.0.1"]
+    P --> F["FFmpeg<br/>decode ke PCM"]
+    F --> O["Opus + DAVE<br/>@discordjs/voice"]
+    O --> V["Voice channel"]
 ```
 
 1. **Resolve**: [`src/ytdlp.js`](src/ytdlp.js) adalah plugin DisTube buatan sendiri. Judul dicari pakai `ytsearch1:`, link playlist dibaca pakai `--flat-playlist`, dan video yang private atau dihapus otomatis dilewati.
@@ -73,7 +62,7 @@ flowchart LR
 
 > **Kenapa nggak pakai `@distube/yt-dlp` atau `@distube/youtube`?** `@distube/yt-dlp` (terakhir rilis 2024) nggak bisa search judul, nggak bisa pakai cookies, dan bongkar playlist satu per satu. `@distube/youtube` streaming lewat ytdl-core, yang kena blokir YouTube yang sama kayak Lavalink tadi.
 
-## 🚀 Mulai cepat
+## Mulai cepat
 
 > Panduan ini buat **Windows**. Butuh PowerShell atau Windows Terminal.
 
@@ -113,11 +102,11 @@ Kalau berhasil, di console muncul:
 📼 yt-dlp 2026.xx.xx
 ✅ Logged in as NamaBot#1234 (1 server)
 ```
-Masuk voice channel, lalu ketik `/play` dan judul lagu favorit lo 🎶
+Masuk voice channel, lalu ketik `/play` dan judul lagu favorit lo.
 
 Cara dapat `GUILD_ID`: di Discord nyalakan *Settings → Advanced → Developer Mode*, lalu klik kanan server dan pilih **Copy Server ID**. Kalau `GUILD_ID` diisi, command langsung muncul di server itu. Kalau dikosongkan, command didaftarkan **global** ke semua server (bisa butuh beberapa menit).
 
-## ⚙️ Konfigurasi (`.env`)
+## Konfigurasi (`.env`)
 
 | Variabel | Default | Keterangan |
 |---|---|---|
@@ -132,11 +121,11 @@ Cara dapat `GUILD_ID`: di Discord nyalakan *Settings → Advanced → Developer 
 | `FFMPEG_PATH` | `ffmpeg` | Path `ffmpeg.exe` kalau nggak ada di PATH |
 | `DEBUG` | `false` | Log debug DisTube di console |
 
-## 🍪 Cookies YouTube (opsional)
+## Cookies YouTube (opsional)
 
 Kadang YouTube minta login ("Sign in to confirm you're not a bot", video 18+, video members). Bot bisa pakai cookies dari akun Google.
 
-> ⚠️ **Pakai akun Google cadangan, jangan akun utama.** Ada kemungkinan akun yang cookies-nya dipakai bot kena limit atau ban dari YouTube.
+> **Penting: pakai akun Google cadangan, jangan akun utama.** Ada kemungkinan akun yang cookies-nya dipakai bot kena limit atau ban dari YouTube.
 
 1. Buka jendela **Incognito/Private** baru di browser.
 2. Login ke YouTube pakai akun cadangan.
@@ -147,7 +136,7 @@ Kadang YouTube minta login ("Sign in to confirm you're not a bot", video 18+, vi
 
 `cookies.txt` sudah masuk `.gitignore`. **Jangan pernah di-commit atau dikirim ke orang**, karena isinya sesi login akun lo.
 
-## 🩺 Kalau YouTube error lagi
+## Kalau YouTube error lagi
 
 YouTube sering ganti sistemnya, dan yt-dlp biasanya rilis fix dalam beberapa hari.
 
@@ -160,7 +149,7 @@ YouTube sering ganti sistemnya, dan yt-dlp biasanya rilis fix dalam beberapa har
 3. Kalau errornya soal login/bot, pasang cookies.
 4. Cek [issue tracker yt-dlp](https://github.com/yt-dlp/yt-dlp/issues) buat masalah YouTube terbaru.
 
-## 🔧 Troubleshooting
+## Troubleshooting
 
 | Masalah | Solusi |
 |---|---|
@@ -177,7 +166,7 @@ YouTube sering ganti sistemnya, dan yt-dlp biasanya rilis fix dalam beberapa har
 | `npm install` error di `@discordjs/opus` | Pakai Node LTS, atau ganti encoder: `npm uninstall @discordjs/opus && npm install opusscript`. |
 | `/play` butuh ±5–9 detik sebelum bunyi | Normal: yt-dlp nyari lagu dulu, lalu mulai download audionya. |
 
-## 🗂️ Struktur
+## Struktur
 
 ```
 ├── docs/                     # halaman GitHub Pages (index.html)
@@ -193,7 +182,7 @@ YouTube sering ganti sistemnya, dan yt-dlp biasanya rilis fix dalam beberapa har
 
 Mau nambah command? Copy salah satu file di `src/commands/`, ubah isinya, lalu `npm run deploy`. Tiap command menerima `(interaction, { distube, leave, scheduleIdleLeave })`.
 
-## 🛣️ Ide fitur selanjutnya
+## Ide fitur selanjutnya
 
 - Filter audio (bassboost, nightcore, 8D) via `queue.filters.add('bassboost')`, sudah ada bawaan DisTube
 - Tombol kontrol (pause/skip) di embed "Now playing" pakai `ButtonBuilder`
@@ -201,6 +190,6 @@ Mau nambah command? Copy salah satu file di `src/commands/`, ubah isinya, lalu `
 - Spotify/Deezer (metadata, lalu dicari di YouTube)
 - Playlist tersimpan per user (SQLite)
 
-## ⚖️ Catatan
+## Catatan
 
 Streaming dari YouTube melanggar ToS YouTube. Bot gede kayak Groovy dan Rythm ditutup gara-gara ini. Aman buat dipakai pribadi atau di server tongkrongan, tapi **jangan dipublikasikan atau dimonetisasi**.
