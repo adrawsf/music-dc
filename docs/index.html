@@ -52,7 +52,7 @@ code, pre { font-family: var(--mono); font-size: .9em; }
 .hand { font-family: var(--hand); font-size: 1.55em; line-height: 1.1; color: #1d1d2a; }
 
 /* ---------- binder + sleeve + paper ---------- */
-.binder { position: relative; max-width: 1040px; margin: clamp(0px, 3vw, 36px) auto; padding-left: 54px; }
+.binder { position: relative; margin: 0; padding-left: 54px; min-height: 100vh; }
 .rings { position: absolute; left: 0; top: 0; bottom: 0; width: 54px; background: #f3f3f1; border-radius: 4px 0 0 4px; overflow: hidden; }
 .rings::before {
   content: ''; position: absolute; inset: 0;
@@ -64,7 +64,8 @@ code, pre { font-family: var(--mono); font-size: .9em; }
   border-radius: 0 6px 6px 0; opacity: .9;
 }
 .sheet {
-  position: relative; background: var(--paper) var(--noise); padding: 22px var(--gutter) 30px;
+  --pad: max(var(--gutter), calc((100vw - 54px - 1000px) / 2));
+  position: relative; background: var(--paper) var(--noise); padding: 22px var(--pad) 30px; min-height: 100vh;
   overflow: hidden; overflow: clip;
   box-shadow: 0 30px 80px -20px rgba(0, 0, 0, 0.7);
 }
@@ -75,9 +76,6 @@ code, pre { font-family: var(--mono); font-size: .9em; }
     radial-gradient(ellipse 40% 30% at var(--sx) var(--sy), rgba(255, 255, 255, 0.55), transparent 70%),
     linear-gradient(115deg, transparent 40%, rgba(255, 255, 255, 0.18) 48%, transparent 56%);
   mix-blend-mode: soft-light; transition: background-position .2s;
-}
-.binder::after { /* tepi plastik */
-  content: ''; pointer-events: none; position: absolute; inset: -2px 0 -2px 40px; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 3px;
 }
 
 /* ---------- header ---------- */
@@ -170,7 +168,7 @@ code, pre { font-family: var(--mono); font-size: .9em; }
 .tagbtn.solid { background: var(--ink); color: var(--paper); }
 .tagbtn:hover { background: var(--blue); color: var(--ink); }
 
-.ribbon { margin: 26px calc(var(--gutter) * -1); background: var(--blue-2); border-top: 1px solid var(--blue-3); border-bottom: 1px solid var(--blue-3); overflow: hidden; }
+.ribbon { margin: 26px calc(var(--pad) * -1); background: var(--blue-2); border-top: 1px solid var(--blue-3); border-bottom: 1px solid var(--blue-3); overflow: hidden; }
 .ribbon-track { display: flex; width: max-content; animation: slide 40s linear infinite; }
 .ribbon span { font: 700 10px/20px var(--sans); text-transform: uppercase; color: var(--blue-ink); padding: 0 48px; white-space: nowrap; }
 @keyframes slide { to { transform: translateX(-50%); } }
@@ -314,9 +312,7 @@ code, pre { font-family: var(--mono); font-size: .9em; }
   .binder { padding-left: 26px; margin: 0; }
   .rings { width: 26px; }
   .rings::before { background: radial-gradient(circle at 14px 50%, #1b1b1b 0 5px, transparent 5.5px) 0 0 / 26px 60px repeat-y; }
-  .rings::after { width: 10px; background: repeating-linear-gradient(to bottom, transparent 0 24px, #b9b9b6 24px 27px, #e9e9e7 27px 30px, #9d9d9a 30px 33px, transparent 33px 60px); }
-  .binder::after { left: 18px; }
-  .mast { grid-template-columns: 1fr auto; }
+  .rings::after { width: 10px; background: repeating-linear-gradient(to bottom, transparent 0 24px, #b9b9b6 24px 27px, #e9e9e7 27px 30px, #9d9d9a 30px 33px, transparent 33px 60px); }  .mast { grid-template-columns: 1fr auto; }
   .mast-center { grid-column: 1 / -1; grid-row: 2; }
   .meta { grid-template-columns: minmax(0, 1fr); }
   .stampbox { height: 100px; }
